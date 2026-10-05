@@ -14,3 +14,9 @@
 
 "Saved %" = cost reduction vs. the same session with no prompt caching
 (input 1×, cache write 1.25× / 2×, cache read 0.1×, output 5×).
+
+## Share with someone else
+Give them `install-doctor.skill` (source: `skills/install-doctor/`). They upload it in Claude
+(Settings → Capabilities → Skills) or unzip it into `~/.claude/skills/`, then ask
+"install the doctor agent". Or run the installer directly:
+`python3 install-doctor/scripts/install.py` (user-wide) / `--project .` (one project).
