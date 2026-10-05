@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Install the doctor agent for the current user (or a project with --project DIR).
+"""Install the doctor and super-doctor agents for the current user (or a project with --project DIR).
 
-Copies the agent and its stats script into <target>/.claude, rewrites the script path
-inside the agent, and adds the 🩺 status line unless one is already configured.
+Copies the agents, playbook and stats script into <target>/.claude, rewrites their paths
+inside the agents, and adds the 🩺 status line unless one is already configured.
 """
 import argparse
 import json
@@ -21,15 +21,22 @@ def main():
     args = ap.parse_args()
 
     claude = (Path(args.project).resolve() if args.project else Path.home()) / ".claude"
-    script = claude / "doctor" / "session_stats.py"
-    agent = claude / "agents" / "doctor.md"
-    script.parent.mkdir(parents=True, exist_ok=True)
-    agent.parent.mkdir(parents=True, exist_ok=True)
+    doctor_dir = claude / "doctor"
+    script = doctor_dir / "session_stats.py"
+    doctor_dir.mkdir(parents=True, exist_ok=True)
+    (claude / "agents").mkdir(parents=True, exist_ok=True)
 
     shutil.copyfile(ASSETS / "session_stats.py", script)
-    text = (ASSETS / "doctor.md").read_text(encoding="utf-8")
-    agent.write_text(text.replace("python3 .claude/doctor/session_stats.py", f'"{sys.executable}" "{script}"'), encoding="utf-8")
-    print(f"agent:  {agent}\nscript: {script}")
+    shutil.copyfile(ASSETS / "playbook.md", doctor_dir / "playbook.md")
+    for name in ("doctor.md", "super-doctor.md"):
+        text = (ASSETS / name).read_text(encoding="utf-8")
+        # Project installs keep the relative paths so the repo can be committed and cloned anywhere.
+        # User-wide installs point at ~/.claude/doctor; backups, changes.log and session-plan.md stay project-relative.
+        if not args.project:
+            text = text.replace("python3 .claude/doctor/session_stats.py", f'"{sys.executable}" "{script}"')
+            text = text.replace("`.claude/doctor/playbook.md`", f"`{doctor_dir / 'playbook.md'}`")
+        (claude / "agents" / name).write_text(text, encoding="utf-8")
+    print(f"agents: {claude / 'agents'}/doctor.md, super-doctor.md\nfiles:  {doctor_dir}")
 
     if args.no_statusline:
         return
