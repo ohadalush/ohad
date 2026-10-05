@@ -2,12 +2,16 @@
 
 | File | Purpose |
 |---|---|
-| `.claude/agents/doctor.md` | The `doctor` subagent: measures the session, diagnoses waste, prescribes fixes. |
+| `.claude/agents/doctor.md` | The `doctor` subagent: measures the session, diagnoses waste, prescribes numbered treatments, applies them on request ("דוקטור, בצע טיפול 1,3"). |
+| `.claude/agents/super-doctor.md` | The `super-doctor` subagent: run before a task; applies safe setup treatments (with backups) and returns a token-saving work plan for the session. |
+| `.claude/doctor/playbook.md` | Shared knowledge base and the list of safe, reversible treatments. |
 | `.claude/doctor/session_stats.py` | Parses the local session transcript (zero model tokens) and computes cache savings, including the doctor's own cost. |
 | `.claude/settings.json` | Always-on status line: `🩺 חיסכון 87% · cache 91% · ctx 64k · out 12k`. |
 
 ## Usage
-- In Claude Code: "doctor, check my session" / "דוקטור, תבדוק אותי" (or `@doctor`).
+- Before a task: "סופר-דוקטור, אני מתחיל עכשיו <task>, תחסוך כמה שיותר בלי לפגוע באיכות" (or `@super-doctor`).
+  Changes to Claude Code config may ask for your approval; undo from `.claude/doctor/backups/`.
+- After / during a task: "דוקטור, תבדוק אותי" (or `@doctor`).
   Note: `/doctor` is a built-in Claude Code command (installation check), so invoke the agent by name.
 - Manually: `python3 .claude/doctor/session_stats.py` (JSON report).
 - Global install: copy `.claude/agents/doctor.md` to `~/.claude/agents/` and the script to `~/.claude/doctor/`, then point the agent's command at `~/.claude/doctor/session_stats.py`.
