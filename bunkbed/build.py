@@ -107,7 +107,7 @@ def to_model(plane, origin, u, v, w):
     return tuple(origin[i] + eu[i] * u + ev[i] * v + ew[i] * w for i in range(3))
 
 # ---------------------------------------------------------------- model
-PANELS, LED = [], []
+PANELS, LED, DIMS = [], [], []
 
 def add(pid, name, group, mat, plane, origin, outline, t=None, band='front', explode=(0, 0, 0)):
     t = t if t is not None else {'back': P['TB'], 'drawer': P['TD'], 'hdf': P['TH'],
@@ -219,6 +219,24 @@ def build():
                 rect(b - a - 2 * s - 2 * td, bh), band='front', explode=dex)
         add(f'DB{j}', 'תחתית מגירה', 'drawers', 'hdf', 'XY', (a + s, T, z0 - P['TH']),
             rect(b - a - 2 * s, bd), band='none', explode=dex)
+    # main dimensions for the viewer: (from, to, offset, label in cm)
+    cm = lambda mm: f'{mm / 10:.1f}'.rstrip('0').rstrip('.')
+    WS = W + n * run
+    for a, b, off in (
+            ((0, 0, 0), (0, 0, H), (-250, 0, 0)),                      # total height
+            ((0, D, 0), (0, D, zUp), (-250, 0, 0)),                    # upper deck height
+            ((0, D, 0), (0, D, zLow), (-500, 0, 0)),                   # lower deck height
+            ((0, 0, H), (W, 0, H), (0, 0, 220)),                       # body width
+            ((0, 0, 0), (WS, 0, 0), (0, -350, 0)),                     # width incl. stairs
+            ((W, 0, H), (W, D, H), (0, 0, 220)),                       # depth
+            ((WS, 0, 0), (WS, Ds, 0), (250, 0, 0)),                    # stairs depth
+            ((W + run, 0, 0), (W + run, 0, h[0]), (0, -1, 0)),          # top step height
+            ((colL + 250, 0, midTop), (colL + 250, 0, zTb), (0, -1, 0)),   # upper opening height
+            ((colL, 0, midTop + 120), (W, 0, midTop + 120), (0, -1, 0)),   # upper opening width
+            ((a2 + 250, 0, zBb), (a2 + 250, 0, midBot), (0, -1, 0)),       # lower opening height
+            ((a2, 0, zBb + 120), (W - rc, 0, zBb + 120), (0, -1, 0))):     # lower opening width
+        L = math.dist(a, b) if a[2] == b[2] or a[0] != b[0] or a[1] != b[1] else abs(b[2] - a[2])
+        DIMS.append(dict(a=a, b=b, off=off, label=cm(L)))
     P.update(midBot=midBot, midTop=midTop, zTb=zTb, zBb=zBb, rise=rise, h=h)
 
 # ---------------------------------------------------------------- checks
@@ -369,7 +387,7 @@ def write_outputs(out):
                              dims=part_dims(p), cnc=not is_rect(p),
                              pts=[(round(x, 1), round(y, 1)) for x, y in tessellate(p['outline'], 8)])
                         for p in PANELS],
-                led=[[tuple(round(c, 1) for c in q) for q in s] for s in LED],
+                led=[[tuple(round(c, 1) for c in q) for q in s] for s in LED], dims=DIMS,
                 cutlist=[dict(ids=ids, name=k[0], L=k[1], W=k[2], t=k[3], mat=k[4], qty=len(ids),
                               cnc=not k[5]) for k, ids in groups.items()],
                 hardware=[dict(item=a, qty=b, note=c) for a, b, c in hw],

@@ -5,17 +5,17 @@
 /* Layout: workshop sheet — a 3D stage on top, then a strip of controls, then the production tables. */
 :root{
   --paper:#f2f3ef; --sheet:#ffffff; --ink:#1e2a32; --muted:#5d6b72; --line:#d5dad3;
-  --accent:#cf5f27; --stage:#e7e9e3; --chip:#eef0ea;
+  --accent:#cf5f27; --stage:#e7e9e3; --dim:#1f6fb2; --dimInk:#174f80; --chip:#eef0ea;
   --display:"Secular One","Assistant",system-ui,sans-serif;
   --body:"Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#13181b; --sheet:#1a2024; --ink:#e4e7e1; --muted:#9aa6ab; --line:#2c353a;
-  --accent:#f0874d; --stage:#1d2428; --chip:#232b30; color-scheme:dark}}
+  --accent:#f0874d; --stage:#1d2428; --dim:#5aa9e6; --dimInk:#a8d3f5; --chip:#232b30; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#13181b; --sheet:#1a2024; --ink:#e4e7e1; --muted:#9aa6ab; --line:#2c353a;
-  --accent:#f0874d; --stage:#1d2428; --chip:#232b30; color-scheme:dark}
+  --accent:#f0874d; --stage:#1d2428; --dim:#5aa9e6; --dimInk:#a8d3f5; --chip:#232b30; color-scheme:dark}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
@@ -29,6 +29,10 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,34px);mar
   background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px}
 .info h3{margin:0 0 4px;font-size:15px}
 .info .mono{font-family:var(--mono);font-size:12.5px;color:var(--muted);direction:ltr;unicode-bidi:isolate;display:inline-block}
+.dimlabels{position:absolute;inset:0;pointer-events:none;direction:ltr}
+.dimlabels>div{top:0;left:0}
+.dim{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--dimInk);background:var(--sheet);
+  border:1px solid var(--dim);border-radius:3px;padding:0 5px;direction:ltr;white-space:nowrap}
 .hint{position:absolute;inset-block-end:10px;inset-inline-end:12px;font-size:12px;color:var(--muted)}
 .controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
 .controls label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
@@ -71,6 +75,7 @@ tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
   <div class="controls">
     <label for="explode">פירוק <input id="explode" type="range" min="0" max="1" step="0.01" value="0"></label>
     <div class="chips" id="groups"></div>
+    <label class="chip"><input id="dimsOn" type="checkbox" checked> מידות (ס"מ)</label>
     <label class="chip"><input id="led" type="checkbox" checked> תאורת LED</label>
     <div class="views">
       <button id="vIso" type="button">איזומטרי</button>
@@ -94,6 +99,7 @@ tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 const DATA = /*DATA*/null;
 const P = DATA.params;
@@ -167,6 +173,8 @@ function update(){
   for (const m of meshes){ m.position.copy(m.userData.ex).multiplyScalar(k); m.visible = visible[m.userData.p.group]; }
   ledGroup.visible = document.getElementById('led').checked && visible.fascia;
   ledGroup.position.set(0,0,400*k);
+  dimGroup.visible = document.getElementById('dimsOn').checked && k < 0.05;
+  dimGroup.traverse(o => { if (o.isCSS2DObject) o.element.hidden = !dimGroup.visible; });
 }
 exp.oninput = update;
 document.getElementById('led').onchange = update;
@@ -220,6 +228,25 @@ document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
 });
 tbl.innerHTML = TABLES.cut();
 
+// main dimensions (cm)
+const dimMat = new THREE.LineBasicMaterial({color:new THREE.Color(css('--dim')||'#1f6fb2')});
+const dimGroup = new THREE.Group(); scene.add(dimGroup);
+const seg = (p,q) => dimGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p,q]), dimMat));
+for (const d of DATA.dims){
+  const a = M(...d.a), b = M(...d.b), off = M(...d.off);
+  const a2 = a.clone().add(off), b2 = b.clone().add(off);
+  seg(a2,b2);
+  if (off.length() > 2){ const ext = off.clone().multiplyScalar(1.12); seg(a, a.clone().add(ext)); seg(b, b.clone().add(ext)); }
+  const dir = b2.clone().sub(a2).normalize();
+  const tick = new THREE.Vector3().crossVectors(dir, Math.abs(dir.y) > .9 ? new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0)).normalize().multiplyScalar(35);
+  for (const p of [a2,b2]) seg(p.clone().sub(tick).sub(dir.clone().multiplyScalar(-0)), p.clone().add(tick));
+  const el = document.createElement('div'); el.className = 'dim'; el.textContent = d.label;
+  const lab = new CSS2DObject(el); lab.position.copy(a2).add(b2).multiplyScalar(.5); dimGroup.add(lab);
+}
+const labels = new CSS2DRenderer(); labels.domElement.className = 'dimlabels'; stage.append(labels.domElement);
+document.getElementById('dimsOn').onchange = update;
+new ResizeObserver(()=>labels.setSize(stage.clientWidth, stage.clientHeight)).observe(stage);
+labels.setSize(stage.clientWidth, stage.clientHeight);
+renderer.setAnimationLoop(()=>{ controls.update(); renderer.render(scene,camera); labels.render(scene,camera); });
 update();
-renderer.setAnimationLoop(()=>{ controls.update(); renderer.render(scene,camera); });
 </script>
