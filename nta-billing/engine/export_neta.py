@@ -15,6 +15,8 @@ Rules (taught by the user on 2026-10-04, from חשבון 5):
     same price list) - verify after export.
 Quantities are written as plain values (no external XLOOKUP links).
 """
+import copy
+
 import openpyxl
 from openpyxl.utils import get_column_letter, column_index_from_string
 
@@ -100,6 +102,34 @@ def export_neta(claude_xlsx, account_no, out_path, template=TEMPLATE):
     my_price = {c: p for c, d, u, p in CANONICAL_ROWS if c and p != ""}
     price_changes = {}
 
+    # Codes the נתע file has no row for (e.g. new air-conditioning items) are
+    # appended to סעיפים חסרים with our description/unit/price; the total row
+    # moves down if the free rows run out.
+    total_row = next(r for r in range(3, mis.max_row + 1)
+                     if str(mis[f"I{r}"].value or "").startswith("=SUM(I3:"))
+    my_row = {c: (d, u, p) for c, d, u, p in CANONICAL_ROWS if c}
+    extra = [c for c in qty if c not in alu_rows and c not in mis_rows and c in my_row]
+    if extra:
+        mis[f"I{total_row}"] = None          # rewritten below, possibly lower down
+        style_row = max(mis_rows.values())
+        r = style_row + 1
+        for code in extra:
+            d, u, p = my_row[code]
+            for col in range(1, mis.max_column + 1):
+                src = mis.cell(row=style_row, column=col)
+                if src.has_style:
+                    mis.cell(row=r, column=col)._style = copy.copy(src._style)
+            mis[f"A{r}"], mis[f"B{r}"], mis[f"C{r}"], mis[f"D{r}"] = code, d, u, p
+            mis[f"E{r}"] = f"=D{r}*(1-$E$1)"
+            mis[f"F{r}"] = f"=E{r}*(1+$F$1)"
+            mis[f"H{r}"] = f"=M{r}+R{r}"
+            mis[f"I{r}"] = f"=N{r}+S{r}"
+            mis[f"S{r}"] = f"=R{r}*F{r}"
+            mis_rows[code] = r
+            r += 1
+        total_row = max(total_row, r + 1)
+        mis[f"I{total_row}"] = f"=SUM(I3:I{total_row - 1})"
+
     placed, unplaced = {}, {}
     for code, q in qty.items():
         if code in alu_rows:
@@ -122,7 +152,7 @@ def export_neta(claude_xlsx, account_no, out_path, template=TEMPLATE):
     # ---- ריכוז
     rk = wb[RIKUZ]
     rk["E2"] = f"=SUM('{ALU}'!{t_letter}:{t_letter})"
-    rk["E6"] = f"='{MISSING}'!I32"
+    rk["E6"] = f"='{MISSING}'!I{total_row}"
 
     wb.calculation.fullCalcOnLoad = True
     wb.save(out_path)
