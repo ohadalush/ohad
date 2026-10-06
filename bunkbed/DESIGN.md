@@ -22,3 +22,8 @@
 - תלות יחידה: `ezdxf`. בלי cadquery, trimesh או shapely.
 - `check.py` לאימות שמדפיס סיכום בלבד: מספר לוחות, שטח, התנגשויות, ו-DXF תקינים.
 - לא לפתוח את התמונות שוב. בלי subagents.
+
+## הרצה
+`pip install ezdxf && python3 bunkbed/build.py` → `bunkbed/out/`:
+`cutlist.csv` (רשימת חיתוך), `hardware.csv` (פרזול), `dxf/<id>.dxf` (קובץ CNC לכל חלק), `all_panels.dxf`, `viewer.html` (תלת־ממד).
+משנים פרמטרים בראש `build.py` (מילון `P`) ומריצים שוב. הסקריפט בודק התנגשויות בין חלקים ומחזיר שגיאה אם יש כאלה.

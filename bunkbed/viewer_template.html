@@ -1,0 +1,225 @@
+<title>מיטת קומותיים S</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Assistant:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: workshop sheet — a 3D stage on top, then a strip of controls, then the production tables. */
+:root{
+  --paper:#f2f3ef; --sheet:#ffffff; --ink:#1e2a32; --muted:#5d6b72; --line:#d5dad3;
+  --accent:#cf5f27; --stage:#e7e9e3; --chip:#eef0ea;
+  --display:"Secular One","Assistant",system-ui,sans-serif;
+  --body:"Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#13181b; --sheet:#1a2024; --ink:#e4e7e1; --muted:#9aa6ab; --line:#2c353a;
+  --accent:#f0874d; --stage:#1d2428; --chip:#232b30; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#13181b; --sheet:#1a2024; --ink:#e4e7e1; --muted:#9aa6ab; --line:#2c353a;
+  --accent:#f0874d; --stage:#1d2428; --chip:#232b30; color-scheme:dark}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,34px);margin:0;text-wrap:balance}
+.dims{font-family:var(--mono);font-size:13px;color:var(--muted);direction:ltr;unicode-bidi:isolate}
+.dims b{color:var(--ink);font-weight:500}
+.stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  height:min(68vh,640px);min-height:340px}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.info{position:absolute;inset-block-start:12px;inset-inline-start:12px;max-width:min(300px,calc(100% - 24px));
+  background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:14px}
+.info h3{margin:0 0 4px;font-size:15px}
+.info .mono{font-family:var(--mono);font-size:12.5px;color:var(--muted);direction:ltr;unicode-bidi:isolate;display:inline-block}
+.hint{position:absolute;inset-block-end:10px;inset-inline-end:12px;font-size:12px;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+.controls label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;
+  background:var(--chip);font-size:13.5px}
+.chip input{accent-color:var(--accent)}
+.views{display:flex;gap:6px}
+button{font:inherit;font-size:13.5px;color:var(--ink);background:var(--sheet);border:1px solid var(--line);
+  border-radius:4px;padding:5px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{accent-color:var(--accent);width:160px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 14px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.tablebox{overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+th{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600;background:var(--chip)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;direction:ltr;text-align:end}
+td.ids{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:normal;min-width:120px}
+.tag{font-size:12px;padding:1px 7px;border-radius:999px;border:1px solid var(--accent);color:var(--accent)}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid var(--line);margin-inline-end:6px;vertical-align:middle}
+.note{color:var(--muted);font-size:13.5px;max-width:70ch;margin:0}
+tr.sel td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+</style>
+
+<div class="wrap" dir="rtl">
+  <header>
+    <h1>מיטת קומותיים S עם מדרגות מגירות</h1>
+    <div class="dims" id="dims"></div>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="info" id="info"><h3>לחצו על חלק</h3><span>כדי לראות מזהה, מידות וחומר.</span></div>
+    <div class="hint">גרירה: סיבוב · גלגלת/צביטה: זום · ימני: הזזה</div>
+  </div>
+
+  <div class="controls">
+    <label for="explode">פירוק <input id="explode" type="range" min="0" max="1" step="0.01" value="0"></label>
+    <div class="chips" id="groups"></div>
+    <label class="chip"><input id="led" type="checkbox" checked> תאורת LED</label>
+    <div class="views">
+      <button id="vIso" type="button">איזומטרי</button>
+      <button id="vFront" type="button">חזית</button>
+      <button id="vSide" type="button">צד</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="cut">רשימת חיתוך</button>
+      <button role="tab" aria-selected="false" data-tab="hw">פרזול ואביזרים</button>
+      <button role="tab" aria-selected="false" data-tab="sheets">לוחות</button>
+    </div>
+    <div class="tablebox" id="table"></div>
+  </div>
+  <p class="note">המידות מבוססות על מזרן 90×190 ועל הנחות שנגזרו מתמונות המוצר (בדף המוצר אין מידות). כל המידות הן פרמטרים ב־<span dir="ltr">bunkbed/build.py</span>, וכל שינוי מייצר מחדש את רשימת החיתוך, את קובצי ה־DXF ואת התצוגה הזו.</p>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const DATA = /*DATA*/null;
+const P = DATA.params;
+const GROUPS = {fascia:'חזית S',carcass:'גוף וגג',upper:'מיטה עליונה',lower:'מיטה תחתונה',back:'גב',stairs:'מדרגות',drawers:'מגירות'};
+const stairsW = Math.max(...DATA.panels.filter(p=>p.group==='stairs').map(p=>p.origin[0]+ (p.plane!=='YZ'?p.dims[0]:p.t)));
+document.getElementById('dims').innerHTML =
+  `<b>${P.W}</b>×<b>${P.D}</b>×<b>${P.H}</b> מ"מ · כולל מדרגות <b>${Math.round(stairsW)}</b> · ${DATA.panels.length} חלקים`;
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35,1,10,40000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f88,1.6));
+const sun = new THREE.DirectionalLight(0xffffff,1.6); sun.position.set(-1500,3500,3000); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff,0.5); fill.position.set(3000,1000,-2000); scene.add(fill);
+
+// model (x right, y back, z up) -> three (x, z, -y)
+const M = (x,y,z) => new THREE.Vector3(x,z,-y);
+const BASIS = {XZ:[[1,0,0],[0,0,1],[0,1,0]], YZ:[[0,1,0],[0,0,1],[1,0,0]], XY:[[1,0,0],[0,1,0],[0,0,1]]};
+const meshes = [];
+const edgeMat = new THREE.LineBasicMaterial({color:0x2a2a2a, transparent:true, opacity:.35});
+for (const p of DATA.panels){
+  const shape = new THREE.Shape(p.pts.map(([u,v])=>new THREE.Vector2(u,v)));
+  const geo = new THREE.ExtrudeGeometry(shape,{depth:p.t,bevelEnabled:false,curveSegments:4});
+  const [eu,ev,ew] = BASIS[p.plane].map(b=>M(...b));
+  const m4 = new THREE.Matrix4().makeBasis(eu,ev,ew).setPosition(M(...p.origin));
+  geo.applyMatrix4(m4);
+  const mat = new THREE.MeshStandardMaterial({color:DATA.materials[p.mat].color, roughness:.72, side:THREE.DoubleSide});
+  const mesh = new THREE.Mesh(geo,mat);
+  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,30), edgeMat));
+  mesh.userData = {p, ex:M(...p.explode).add(new THREE.Vector3(0,0,0)), base:mat.color.clone()};
+  scene.add(mesh); meshes.push(mesh);
+}
+const ledGroup = new THREE.Group();
+const ledMat = new THREE.LineBasicMaterial({color:0xffa24a});
+for (const s of DATA.led){
+  ledGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(s.map(q=>M(...q))), ledMat));
+}
+scene.add(ledGroup);
+
+const box = new THREE.Box3(); meshes.forEach(m=>box.expandByObject(m));
+const center = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()).length();
+function view(dir){
+  camera.position.copy(center).add(dir.normalize().multiplyScalar(size*1.35));
+  controls.target.copy(center); controls.update();
+}
+const VIEWS = {vIso:new THREE.Vector3(-0.8,0.55,1), vFront:new THREE.Vector3(0,0.05,1), vSide:new THREE.Vector3(1,0.1,0.02)};
+for (const id in VIEWS) document.getElementById(id).onclick = () => view(VIEWS[id].clone());
+view(VIEWS.vIso.clone());
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+function applyTheme(){ scene.background = new THREE.Color(css('--stage')||'#e7e9e3'); }
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+// explode + group visibility
+const exp = document.getElementById('explode');
+const visible = Object.fromEntries(Object.keys(GROUPS).map(g=>[g,true]));
+function update(){
+  const k = +exp.value;
+  for (const m of meshes){ m.position.copy(m.userData.ex).multiplyScalar(k); m.visible = visible[m.userData.p.group]; }
+  ledGroup.visible = document.getElementById('led').checked && visible.fascia;
+  ledGroup.position.set(0,0,400*k);
+}
+exp.oninput = update;
+document.getElementById('led').onchange = update;
+const gbox = document.getElementById('groups');
+for (const [g,label] of Object.entries(GROUPS)){
+  const l = document.createElement('label'); l.className='chip';
+  l.innerHTML = `<input type="checkbox" id="g-${g}" checked> ${label}`;
+  l.querySelector('input').onchange = e => { visible[g] = e.target.checked; update(); };
+  gbox.append(l);
+}
+
+// picking
+const info = document.getElementById('info'), ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+let selected = null, down = null;
+renderer.domElement.addEventListener('pointerdown', e => down = [e.clientX,e.clientY]);
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX-down[0], e.clientY-down[1]) > 5) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  ptr.set((e.clientX-r.left)/r.width*2-1, -(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ptr,camera);
+  const hit = ray.intersectObjects(meshes.filter(m=>m.visible),false)[0];
+  select(hit ? hit.object : null);
+});
+function select(m){
+  if (selected) selected.material.color.copy(selected.userData.base);
+  selected = m;
+  document.querySelectorAll('tr.sel').forEach(r=>r.classList.remove('sel'));
+  if (!m){ info.innerHTML = '<h3>לחצו על חלק</h3><span>כדי לראות מזהה, מידות וחומר.</span>'; return; }
+  const p = m.userData.p;
+  m.material.color.set(css('--accent'));
+  info.innerHTML = `<h3>${p.name}</h3><span class="mono">${p.id} · ${p.dims[0]}×${p.dims[1]}×${p.t}</span><br>
+    ${DATA.materials[p.mat].name}${p.cnc ? ' · <span class="tag">CNC</span>' : ''}`;
+  document.querySelectorAll(`tr[data-ids~="${p.id}"]`).forEach(r=>r.classList.add('sel'));
+}
+
+// tables
+const tbl = document.getElementById('table');
+const sw = m => `<span class="swatch" style="background:${DATA.materials[m].color}"></span>`;
+const TABLES = {
+  cut: () => `<table><thead><tr><th>מזהים</th><th>שם החלק</th><th>חומר</th><th>עובי</th><th>אורך</th><th>רוחב</th><th>כמות</th><th>חיתוך</th></tr></thead><tbody>${
+    DATA.cutlist.map(r=>`<tr data-ids="${r.ids.join(' ')}"><td class="ids">${r.ids.join(' ')}</td><td>${r.name}</td><td>${sw(r.mat)}${DATA.materials[r.mat].name}</td>
+    <td class="num">${r.t}</td><td class="num">${r.L}</td><td class="num">${r.W}</td><td class="num">${r.qty}</td><td>${r.cnc?'<span class="tag">CNC</span>':'מסור'}</td></tr>`).join('')}</tbody></table>`,
+  hw: () => `<table><thead><tr><th>פריט</th><th>כמות</th><th>הערה</th></tr></thead><tbody>${
+    DATA.hardware.map(r=>`<tr><td>${r.item}</td><td class="num">${r.qty}</td><td>${r.note}</td></tr>`).join('')}</tbody></table>`,
+  sheets: () => `<table><thead><tr><th>חומר</th><th>שטח נטו מ"ר</th><th>לוחות 244×122 (סידור פסים)</th></tr></thead><tbody>${
+    Object.entries(DATA.sheets).map(([m,s])=>`<tr><td>${sw(m)}${s.name}</td><td class="num">${s.m2}</td><td class="num">${s.sheets}</td></tr>`).join('')}</tbody></table>`
+};
+document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected', x===b));
+  tbl.innerHTML = TABLES[b.dataset.tab]();
+});
+tbl.innerHTML = TABLES.cut();
+
+update();
+renderer.setAnimationLoop(()=>{ controls.update(); renderer.render(scene,camera); });
+</script>
