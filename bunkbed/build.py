@@ -33,7 +33,7 @@ P = dict(
     a2=390,          # wood filler width left of lower opening
     rightCol=320,    # fascia right column (lower level)
     R=90,            # fascia corner radius
-    nSteps=4, run=260, Ds=450,      # stairs: steps, tread run, depth
+    nSteps=4, run=240, Ds=450,      # stairs: steps, tread run, stair width
     shelfUpZ=600, shelfUpD=200,     # upper shelf height above deck, depth
     shelfLoZ=520, shelfLoD=150,     # lower shelf
     drawerDepth=350, slide=13,      # drawer box depth, slide gap per side
@@ -153,8 +153,8 @@ def build():
     # --- carcass
     add('S1', 'דופן שמאל', 'carcass', 'oak', 'YZ', (0, T, 0), rect(Ls, H), explode=(-300, 0, 0))
     add('S2', 'דופן ימין (פתח כניסה)', 'carcass', 'oak', 'YZ', (W - T, T, 0), fillet(
-        [(0, 0, 0), (Ls, 0, 0), (Ls, H, 0), (P['Ds'] - T, H, R), (P['Ds'] - T, zUp, R),
-         (0, zUp, 0)]), band='all', explode=(300, 0, 0))
+        [(0, 0, 0), (Ls, 0, 0), (Ls, zUp, 0), (Ls - 2 * P['run'] - 40, zUp, R),
+         (Ls - 2 * P['run'] - 40, H, R), (0, H, 0)]), band='all', explode=(300, 0, 0))
     add('RF', 'גג', 'carcass', 'white', 'XY', (T, T, H - T), rect(W - 2 * T, Ls), explode=(0, 0, 400))
     add('UD', 'רצפת מיטה עליונה', 'upper', 'oak', 'XY', (T, T, zUp - T), rect(W - 2 * T, Ls),
         explode=(0, 0, 150))
@@ -186,42 +186,50 @@ def build():
     shelf('U', 'upper', zUp, P['shelfUpZ'], P['shelfUpD'], H - T - (zUp + P['shelfUpZ'] + T), 250)
     shelf('L', 'lower', zLow, P['shelfLoZ'], P['shelfLoD'], 180, 250)
 
-    # --- stairs with drawers (x >= W, y = 0..Ds), climbing toward the bed
-    n, run, Ds, rise = P['nSteps'], P['run'], P['Ds'], zUp / (P['nSteps'] + 1)
-    h = [(n - j) * rise for j in range(n)]          # column j top (j=0 next to bed)
-    ex = (450, 0, 0)
-    for k in range(n + 1):
-        x = W + k * run - (T if k == n else 0)
-        hk = (h[k - 1] if k else h[0]) - T
-        add(f'SW{k}', 'מחיצת מדרגות', 'stairs', 'oak', 'YZ', (x, 0, 0), rect(Ds - T, hk), explode=ex)
-    for j in range(n):
-        x0 = W + j * run + T
-        x1 = W + (j + 1) * run + (T if j < n - 1 else 0)
-        add(f'ST{j}', f'שלב מדרגה {n-j}', 'stairs', 'oak', 'XY', (x0, 0, h[j] - T),
-            rect(x1 - x0, Ds - T), band='front', explode=ex)
+    # --- stairs with drawers beside the right side (x = W..W+Ds), climbing front -> back.
+    # Each level panel is the tread of step k and the floor of the drawer above it.
+    n, Ds, rise = P['nSteps'], P['Ds'], zUp / (P['nSteps'] + 1)
+    run = min(P['run'], (D - 5) // n)
+    h = [(k + 1) * rise for k in range(n)]          # tread top of step k (k=0 at the front)
+    Lr, ex, dex = n * run, (450, 0, 0), (450, -350, 0)
+    prof = [(0, 0, 0), (Lr, 0, 0)]
+    for k in range(n - 1, -1, -1):
+        prof += [((k + 1) * run, h[k] - T, 0), (k * run, h[k] - T, 0)]
+    add('SWI', 'דופן מדרגות פנימית (מדורגת)', 'stairs', 'oak', 'YZ', (W, 0, 0), prof, explode=ex)
     g = P['guard'] - 10
-    add('SG', 'מעקה/דופן מדרגות לבן', 'stairs', 'white', 'XZ', (W, Ds - T, 0), fillet(
-        [(0, 0, 0), (n * run, 0, 0), (n * run, h[-1] + g, 60), (run, h[0] + g, 0),
-         (0, zUp + 300, 60)]), band='all', explode=(450, 200, 0))
-    dex = (450, -350, 0)
-    for j in range(n):
-        a = W + j * run + T
-        b = W + (j + 1) * run - (T if j == n - 1 else 0)
-        top = h[j] - T
-        add(f'DF{j}', f'חזית מגירה {n-j}', 'drawers', 'oak', 'XZ', (a + 2, 0, 10),
-            rect(b - a - 4, top - 12), band='all', explode=dex)
-        bh, bd, s, td, z0 = min(top - 60, 250), P['drawerDepth'], P['slide'], P['TD'], 30
+    add('SWO', 'דופן מדרגות חיצונית לבנה + מעקה', 'stairs', 'white', 'YZ', (W + Ds - T, 0, 0), fillet(
+        [(0, 0, 0), (Lr, 0, 0), (Lr, zUp + 300, 60), ((n - 1) * run, h[-1] + g, 0),
+         (0, h[0] + g, 60)]), band='all', explode=(650, 0, 0))
+    add('SBS', 'בסיס מדרגות', 'stairs', 'oak', 'XY', (W + T, 0, 0), rect(Ds - 2 * T, Lr - T),
+        band='front', explode=ex)
+    add('SBK', 'גב מדרגות', 'stairs', 'oak', 'XZ', (W + T, Lr - T, T), rect(Ds - 2 * T, h[-1] - 2 * T),
+        band='none', explode=ex)
+    for k in range(n):
+        y1 = Lr if k == n - 1 else Lr - T
+        add(f'ST{k}', f'שלב מדרגה {k+1}', 'stairs', 'oak', 'XY', (W + T, k * run, h[k] - T),
+            rect(Ds - 2 * T, y1 - k * run), band='front', explode=ex)
+    a, b, s, td = W + T, W + Ds - T, P['slide'], P['TD']
+    slides = []
+    for k in range(n):
+        zb = h[k - 1] if k else T
+        add(f'DF{k}', f'חזית מגירה {k+1}', 'drawers', 'oak', 'XZ', (a + 2, k * run, zb + 2),
+            rect(b - a - 4, h[k] - T - zb - 4), band='all', explode=dex)
+        bd = min(P['drawerDepth'], int((Lr - T - k * run - T - 10) // 50 * 50))
+        bh, z0, y0 = min(h[k] - T - zb - 40, 250), zb + 12 + P['TH'], k * run + T
+        slides.append(bd)
         for side, x in (('L', a + s), ('R', b - s - td)):
-            add(f'DS{j}{side}', 'דופן מגירה', 'drawers', 'drawer', 'YZ', (x, T, z0), rect(bd, bh),
+            add(f'DS{k}{side}', 'דופן מגירה', 'drawers', 'drawer', 'YZ', (x, y0, z0), rect(bd, bh),
                 band='front', explode=dex)
-        for tag, y in (('I', T), ('K', T + bd - td)):
-            add(f'D{tag}{j}', 'חזית/גב פנימי מגירה', 'drawers', 'drawer', 'XZ', (a + s + td, y, z0),
+        for tag, y in (('I', y0), ('K', y0 + bd - td)):
+            add(f'D{tag}{k}', 'חזית/גב פנימי מגירה', 'drawers', 'drawer', 'XZ', (a + s + td, y, z0),
                 rect(b - a - 2 * s - 2 * td, bh), band='front', explode=dex)
-        add(f'DB{j}', 'תחתית מגירה', 'drawers', 'hdf', 'XY', (a + s, T, z0 - P['TH']),
+        add(f'DB{k}', 'תחתית מגירה', 'drawers', 'hdf', 'XY', (a + s, y0, z0 - P['TH']),
             rect(b - a - 2 * s, bd), band='none', explode=dex)
+    P.update(slides=slides, run_eff=run)
+
     # main dimensions for the viewer: (from, to, offset, label in cm)
     cm = lambda mm: f'{mm / 10:.1f}'.rstrip('0').rstrip('.')
-    WS = W + n * run
+    WS = W + Ds
     for a, b, off in (
             ((0, 0, 0), (0, 0, H), (-250, 0, 0)),                      # total height
             ((0, D, 0), (0, D, zUp), (-250, 0, 0)),                    # upper deck height
@@ -229,8 +237,9 @@ def build():
             ((0, 0, H), (W, 0, H), (0, 0, 220)),                       # body width
             ((0, 0, 0), (WS, 0, 0), (0, -350, 0)),                     # width incl. stairs
             ((W, 0, H), (W, D, H), (0, 0, 220)),                       # depth
-            ((WS, 0, 0), (WS, Ds, 0), (250, 0, 0)),                    # stairs depth
-            ((W + run, 0, 0), (W + run, 0, h[0]), (0, -1, 0)),          # top step height
+            ((WS, 0, 0), (WS, Lr, 0), (250, 0, 0)),                    # stairs length
+            ((WS, Lr, 0), (WS, Lr, h[-1]), (250, 0, 0)),               # top step height
+            ((W, 0, 0), (WS, 0, 0), (0, -170, 0)),                     # stairs width
             ((colL + 250, 0, midTop), (colL + 250, 0, zTb), (0, -1, 0)),   # upper opening height
             ((colL, 0, midTop + 120), (W, 0, midTop + 120), (0, -1, 0)),   # upper opening width
             ((a2 + 250, 0, zBb), (a2 + 250, 0, midBot), (0, -1, 0)),       # lower opening height
@@ -315,6 +324,8 @@ def pack(mat, kerf=5):
 def write_outputs(out):
     import ezdxf
     os.makedirs(f'{out}/dxf', exist_ok=True)
+    for f in os.listdir(f'{out}/dxf'):
+        os.remove(f'{out}/dxf/{f}')
     groups = OrderedDict()
     for p in PANELS:
         a, b = part_dims(p)
@@ -360,7 +371,7 @@ def write_outputs(out):
         ('ברגי קונפירמט 7x50', carcass_joints * 4, 'הערכה: 4 לכל חלק גוף'),
         ('ברגי סיני 4x30 לחיבור החזית מאחור', math.ceil(2 * W / 250) * 2, 'כל 25 ס"מ'),
         ('ברגי גב 3.5x16 / סיכות', math.ceil(2 * (W + P['H']) / 150) * 2, 'כל 15 ס"מ'),
-        ('מסילות טלסקופיות טריקה שקטה 350 מ"מ (זוג)', n, ''),
+        ('מסילות טלסקופיות טריקה שקטה (זוג)', n, 'אורכים: ' + ', '.join(map(str, P['slides'])) + ' מ"מ'),
         ('ידיות כפתור', n, ''),
         ('פס LED 12V + פרופיל אלומיניום + מפזר (מטר)', round(led_len + 0.5, 1),
          'לאורך הפינות הפנימיות של ה-S'),
@@ -403,7 +414,7 @@ if __name__ == '__main__':
     hits = collisions()
     groups, sheets, led_len = write_outputs(os.path.join(here, 'out'))
     print(f"overall W x D x H = {P['W']} x {P['D']} x {P['H']} mm; with stairs W = "
-          f"{P['W'] + P['nSteps'] * P['run']} mm")
+          f"{P['W'] + P['Ds']} mm")
     print(f"panels {len(PANELS)}, cut-list lines {len(groups)}, LED {led_len:.1f} m, "
           f"step rise {P['rise']:.0f} mm")
     print('sheets:', ', '.join(f"{v['name']}: {v['m2']} m2 -> {v['sheets']}" for v in sheets.values()))

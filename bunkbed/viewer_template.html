@@ -151,7 +151,7 @@ function view(dir){
   camera.position.copy(center).add(dir.normalize().multiplyScalar(size*1.35));
   controls.target.copy(center); controls.update();
 }
-const VIEWS = {vIso:new THREE.Vector3(-0.8,0.55,1), vFront:new THREE.Vector3(0,0.05,1), vSide:new THREE.Vector3(1,0.1,0.02)};
+const VIEWS = {vIso:new THREE.Vector3(0.85,0.5,1), vFront:new THREE.Vector3(0,0.05,1), vSide:new THREE.Vector3(1,0.1,0.02)};
 for (const id in VIEWS) document.getElementById(id).onclick = () => view(VIEWS[id].clone());
 view(VIEWS.vIso.clone());
 
