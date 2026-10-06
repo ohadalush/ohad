@@ -452,15 +452,20 @@ def write_outputs(out):
     with open(f'{out}/viewer.html', 'w', encoding='utf-8') as f:
         f.write(tpl.replace('/*DATA*/null', json.dumps(data, ensure_ascii=False, separators=(',', ':'))))
     write_sketchup(f'{out}/bunkbed_sketchup.rb')
+    write_sketchup(f'{out}/bunkbed_sketchup_mirrored.rb', mirror=True)
     return groups, sheets, led_len
 
-def write_sketchup(path):
-    """Ruby script that builds the model natively in SketchUp: assembled + fully exploded."""
-    gd, parts = P['grooveD'], []
+def write_sketchup(path, mirror=False):
+    """Ruby script that builds the model natively in SketchUp: assembled + fully exploded.
+    mirror=True flips left/right (x -> W - x): stairs on the left, S reversed; text stays readable."""
+    gd, parts, W = P['grooveD'], [], P['W']
+    fx = (lambda q: [round(W - q[0], 2)] + list(q[1:])) if mirror else (lambda q: list(q))
     for p in PANELS:
         ew = BASIS[p['plane']][2]
-        loop = lambda pts, w: [[round(c, 2) for c in to_model(p['plane'], p['origin'], u, v, w)]
+        loop = lambda pts, w: [fx([round(c, 2) for c in to_model(p['plane'], p['origin'], u, v, w)])
                                for u, v in pts]
+        if mirror:
+            ew = (-ew[0], ew[1], ew[2])
         outer, sol = tessellate(p['outline'], 8), []
         if p['grooves']:
             bands = [g['band'] for g in p['grooves']]
@@ -471,15 +476,21 @@ def write_sketchup(path):
         else:
             sol.append(dict(outer=loop(outer, 0), holes=[], dir=ew, depth=p['t'], mat=p['mat']))
         x0, y0, x1, y1 = bbox2(p['outline'])
-        parts.append(dict(id=p['id'], name=p['name'], group=p['group'], explode=p['explode'],
-                          solids=sol, text=p['text'],
-                          tc=to_model(p['plane'], p['origin'], (x0 + x1) / 2, (y0 + y1) / 2, -0.4)))
+        ex = p['explode']
+        parts.append(dict(id=p['id'], name=p['name'], group=p['group'],
+                          explode=[-ex[0], ex[1], ex[2]] if mirror else ex, solids=sol, text=p['text'],
+                          tc=fx(to_model(p['plane'], p['origin'], (x0 + x1) / 2, (y0 + y1) / 2, -0.4))))
     mats = {k: [v[0], v[1]] for k, v in MATERIALS.items()}
     mats.update(led=['LED צהוב', '#ffd21f'], ink=['חריטה', '#2b2f33'])
-    data = json.dumps(dict(parts=parts, mats=mats, groups=GROUP_NAMES, shift=P['W'] + P['Ds'] + 1800),
-                      ensure_ascii=False)
+    suffix = ' (הפוך)' if mirror else ''
+    data = json.dumps(dict(parts=parts, mats=mats, groups=GROUP_NAMES, shift=P['W'] + P['Ds'] + 1800,
+                           names=['מודל מורכב' + suffix, 'מודל מפורק' + suffix]), ensure_ascii=False)
+    rb = RUBY.replace('__DATA__', data)
+    if mirror:
+        rb = rb.replace('BunkBedS', 'BunkBedSMirrored').replace(
+            '# S bunk bed - generated', '# S bunk bed MIRRORED (stairs on the left) - generated')
     with open(path, 'w', encoding='utf-8') as f:
-        f.write(RUBY.replace('__DATA__', data))
+        f.write(rb)
 
 GROUP_NAMES = {'fascia': 'חזית S', 'carcass': 'גוף וגג', 'upper': 'מיטה עליונה',
                'lower': 'מיטה תחתונה', 'back': 'גב', 'stairs': 'מדרגות', 'drawers': 'מגירות'}
@@ -555,8 +566,8 @@ module BunkBedS
     end
     tags = {}
     D['groups'].each { |key, label| tags[key] = m.layers[label] || m.layers.add(label) }
-    model('מודל מורכב', 0, 0, mats, tags)
-    model('מודל מפורק', D['shift'], 1, mats, tags)
+    model(D['names'][0], 0, 0, mats, tags)
+    model(D['names'][1], D['shift'], 1, mats, tags)
     m.commit_operation
     m.active_view.zoom_extents
   end
