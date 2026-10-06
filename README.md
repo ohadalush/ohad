@@ -20,3 +20,9 @@ Give them `install-doctor.skill` (source: `skills/install-doctor/`). They upload
 (Settings → Capabilities → Skills) or unzip it into `~/.claude/skills/`, then ask
 "install the doctor agent". Or run the installer directly:
 `python3 install-doctor/scripts/install.py` (user-wide) / `--project .` (one project).
+
+# nta-billing — נת"ע billing tool
+
+`nta-billing/`: command-line tool that builds the נת"ע bills of quantities (see `nta-billing/SETUP.md` and `nta-billing/CLAUDE.md`).
+Formulas are recalculated by a built-in Python engine (`nta-billing/engine/xlcalc.py`), so LibreOffice is only needed for the PDF export.
+Tests: `cd nta-billing && python -m unittest discover tests`.

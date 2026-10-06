@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python cli.py:*)",
+      "Bash(python3 cli.py:*)",
+      "Bash(py cli.py:*)",
+      "Bash(python -m unittest:*)",
+      "Bash(python3 -m unittest:*)",
+      "Bash(py -m unittest:*)"
+    ]
+  }
+}

@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ספר החוקים — מערכת חשבונות מיגון/אלומיניום</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#FAF7F1;
+    --paper-raised:#FFFFFF;
+    --ink:#22201C;
+    --ink-soft:#5B564D;
+    --line:#DDD5C7;
+    --line-strong:#B9AE99;
+    --blueprint:#2E4A5E;
+    --blueprint-soft:#E7EEF2;
+    --amber:#B4602F;
+    --amber-soft:#F7E9DD;
+    --ok:#3B6E4C;
+    --ok-soft:#E6EFE8;
+    --mono: 'Roboto Mono', ui-monospace, monospace;
+    --sans: 'Heebo', 'Segoe UI', Arial, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    font-size:16px;
+  }
+
+  /* ===== layout shell ===== */
+  .shell{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    max-width:1280px;
+    margin:0 auto;
+  }
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr;}
+    nav.toc{position:static !important; height:auto !important; border-inline-start:none; border-bottom:1px solid var(--line);}
+  }
+
+  /* ===== header ===== */
+  header.masthead{
+    max-width:1280px;
+    margin:0 auto;
+    padding:56px 40px 28px;
+    border-bottom:3px solid var(--blueprint);
+  }
+  header.masthead .kicker{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.04em;
+    color:var(--blueprint);
+    margin-bottom:10px;
+  }
+  header.masthead h1{
+    font-size:clamp(28px,4vw,44px);
+    font-weight:800;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+  }
+  header.masthead p.sub{
+    color:var(--ink-soft);
+    font-size:17px;
+    max-width:640px;
+    margin:0 0 22px;
+  }
+  .meta-row{
+    display:flex; gap:22px; flex-wrap:wrap;
+    font-size:13.5px; color:var(--ink-soft);
+    font-family:var(--mono);
+  }
+  .meta-row b{color:var(--ink); font-weight:600;}
+
+  #search{
+    margin-top:22px;
+    width:100%;
+    max-width:420px;
+    padding:11px 16px;
+    border:1.5px solid var(--line-strong);
+    border-radius:8px;
+    background:var(--paper-raised);
+    font-family:var(--sans);
+    font-size:15px;
+    color:var(--ink);
+  }
+  #search:focus{outline:2px solid var(--blueprint); outline-offset:1px;}
+  #search::placeholder{color:#9C947F;}
+
+  /* ===== TOC ===== */
+  nav.toc{
+    position:sticky; top:0; align-self:start; height:100vh;
+    overflow-y:auto;
+    padding:28px 20px 60px 0;
+    border-inline-start:1px solid var(--line);
+  }
+  nav.toc h2{
+    font-size:12px; text-transform:none;
+    color:var(--ink-soft); font-family:var(--mono);
+    margin:0 0 14px; padding-right:6px;
+  }
+  nav.toc ol{list-style:none; margin:0; padding:0;}
+  nav.toc > ol > li{margin-bottom:2px;}
+  nav.toc a{
+    display:block;
+    padding:8px 10px;
+    border-radius:6px;
+    color:var(--ink);
+    text-decoration:none;
+    font-size:14.5px;
+  }
+  nav.toc a:hover{background:var(--blueprint-soft);}
+  nav.toc a.active{background:var(--blueprint); color:#fff;}
+  nav.toc .chnum{font-family:var(--mono); color:var(--blueprint); margin-inline-end:6px; font-size:13px;}
+  nav.toc a.active .chnum{color:#fff;}
+
+  /* ===== main content ===== */
+  main{padding:28px 40px 120px;}
+
+  section.chapter{
+    margin-bottom:64px;
+    scroll-margin-top:20px;
+  }
+  section.chapter > .chapter-head{
+    display:flex; align-items:baseline; gap:14px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:12px;
+    margin-bottom:20px;
+  }
+  section.chapter > .chapter-head .num{
+    font-family:var(--mono);
+    font-size:22px;
+    color:var(--blueprint);
+    font-weight:600;
+  }
+  section.chapter > .chapter-head h2{
+    font-size:24px;
+    margin:0;
+    font-weight:700;
+  }
+  section.chapter > .chapter-intro{
+    color:var(--ink-soft);
+    margin:0 0 22px;
+    max-width:760px;
+    font-size:15px;
+  }
+
+  h3.subhead{
+    font-size:16px;
+    font-weight:700;
+    margin:28px 0 12px;
+    color:var(--blueprint);
+    border-inline-start:3px solid var(--blueprint);
+    padding-inline-start:10px;
+  }
+
+  /* ===== rule blocks (details/summary) ===== */
+  details.rule{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:10px;
+    overflow:hidden;
+  }
+  details.rule[open]{border-color:var(--line-strong);}
+  details.rule > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:13px 16px;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    font-size:15px;
+    font-weight:500;
+  }
+  details.rule > summary::-webkit-details-marker{display:none;}
+  details.rule > summary .arrow{
+    flex:0 0 auto;
+    width:20px; height:20px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    background:var(--blueprint-soft);
+    color:var(--blueprint);
+    font-size:12px;
+    transition:transform .15s ease;
+    margin-top:1px;
+  }
+  details.rule[open] > summary .arrow{transform:rotate(90deg);}
+  details.rule > summary .code{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--blueprint);
+    background:var(--blueprint-soft);
+    padding:2px 7px;
+    border-radius:5px;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+  details.rule > summary .headline{flex:1 1 auto;}
+  details.rule > .body{
+    padding:2px 16px 18px 48px;
+    font-size:14.5px;
+    color:var(--ink-soft);
+  }
+  details.rule > .body p{margin:0 0 10px;}
+  details.rule > .body code, .inline-code{
+    font-family:var(--mono);
+    background:var(--blueprint-soft);
+    color:var(--blueprint);
+    padding:1px 6px;
+    border-radius:4px;
+    font-size:13px;
+  }
+  details.rule > .body table{
+    width:100%; border-collapse:collapse; margin:10px 0 14px; font-size:13.5px;
+  }
+  details.rule > .body th, details.rule > .body td{
+    border:1px solid var(--line); padding:7px 10px; text-align:right;
+  }
+  details.rule > .body th{background:var(--paper); font-weight:600; color:var(--ink);}
+  details.rule > .body td.mono, details.rule > .body th.mono{font-family:var(--mono); font-size:12.5px;}
+  details.rule > .body ul, details.rule > .body ol{margin:6px 0 12px; padding-inline-start:22px;}
+  details.rule > .body li{margin-bottom:4px;}
+
+  /* status tags */
+  .tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-inline-start:8px;
+    vertical-align:middle;
+  }
+  .tag.warn{background:var(--amber-soft); color:var(--amber);}
+  .tag.ok{background:var(--ok-soft); color:var(--ok);}
+  .tag.open{background:#F1E8E4; color:#9C4A4A;}
+
+  .callout{
+    border-inline-start:3px solid var(--amber);
+    background:var(--amber-soft);
+    padding:12px 16px;
+    border-radius:0 8px 8px 0;
+    margin:14px 0;
+    font-size:14px;
+  }
+  .callout.ok{border-inline-start-color:var(--ok); background:var(--ok-soft);}
+  .callout b{display:block; margin-bottom:4px;}
+
+  footer{
+    text-align:center;
+    padding:40px 20px 80px;
+    color:var(--ink-soft);
+    font-size:13px;
+    font-family:var(--mono);
+  }
+
+  mark{background:#FFE9A8; color:inherit; border-radius:2px;}
+  .hidden-by-search{display:none !important;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="kicker">מסמך פנימי — לא להפצה</div>
+  <h1>ספר החוקים</h1>
+  <p class="sub">כל הלוגיקה שקובעת איך ריכוז כמויות גולמי הופך לכתב כמויות מתומחר: מבנה הקבצים, מנוע הכללים סעיף-אחר-סעיף, משפחות טווחי גודל, זיגוג, חריגים, ובאגים שכבר תפסנו.</p>
+  <div class="meta-row">
+    <span>15 פרקים</span>
+    <span>·</span>
+    <span>מבוסס על <b>rules.py</b> + <b>order_template.py</b> + כל השיחות עד כה</span>
+    <span>·</span>
+    <span>עודכן לאחרונה: הוספת 12.068.1006 וכלל הזיגוג הכללי</span>
+  </div>
+  <input type="text" id="search" placeholder="חיפוש בספר החוקים… (למשל: קיפ, ארגז, מסלולים)">
+</header>
+
+<div class="shell">
+<nav class="toc" aria-label="תוכן עניינים">
+  <h2>תוכן עניינים</h2>
+  <ol id="toc-list"></ol>
+</nav>
+
+<main id="content">
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head"><span class="num">01</span><h2>מבנה הקלט — ריכוז כמויות</h2></div>
+  <p class="chapter-intro">כל הזמנה מגיעה כקובץ Excel אחד עם שני גיליונות: "סיכומים" (שדות מצטברים) ו"פירוט אלמנטים" (שורה לכל קבוצת אלמנטים זהים). שני הגיליונות חייבים להיבדק — ראינו כמה פעמים איך התעלמות מ"פירוט אלמנטים" הובילה לשיוך שגוי.</p>
+
+  <details class="rule" open>
+    <summary><span class="arrow">›</span><span class="headline">גיליון "סיכומים" — שדה + ערך בלבד</span></summary>
+    <div class="body">
+      <p>עמודה A = שם שדה, עמודה B = ערך. אין שורת כותרת קבועה — כל שורה עם תוכן בעמודה A נקראת.</p>
+      <p><b>שורות מטא-דאטה</b> (לא כמות): <span class="inline-code">מספר הזמנה</span>, <span class="inline-code">שם משפחה</span>, <span class="inline-code">כתובת</span>, <span class="inline-code">קומה</span>, <span class="inline-code">מספר דירה</span>.</p>
+      <p><b>נורמליזציה של שמות שדות:</b> אם שם השדה לא תואם בדיוק לרשימה הקנונית, מנסים להוסיף תחילית <span class="inline-code">שטח </span> / <span class="inline-code">מס' </span> / <span class="inline-code">מספר </span>. אם עדיין לא נמצא — השדה מדווח כ"לא מזוהה" ויש לשאול, לא להתעלם בשקט.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">גיליון "פירוט אלמנטים" — שורה לכל קבוצת אלמנטים</span></summary>
+    <div class="body">
+      <p>עמודות: סוג אלמנט, כמות, רוחב, גובה, רשת, היקף כולל, שטח יחידה, שטח כולל, שטח רשת, מנוע, טקסאונד, <b>מספר מסלולים</b>, שטח יחידת תריס לפירוק, הערות, תריס, תריס אור.</p>
+      <p>זה המקור היחיד ל<b>שטח יחידה</b> ול<b>מספר מסלולים (2/3)</b> — שני נתונים שחייבים לקבוע לאיזה סעיף גודל/משפחה משייכים כל אלמנט. סכימת ה"סיכומים" לבדה לא מספיקה לזה.</p>
+      <div class="callout"><b>לקח מתועד</b>הגיליון הזה נשכח שלוש פעמים ברצף (הזמנות 1633, 1568, 1562) והתוצאה הייתה שיוך שגוי לגמרי. יש לבדוק את הגיליון הזה <b>תמיד</b>, גם בשאילתה חד-פעמית.</div>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head"><span class="num">02</span><h2>כתב הכמויות — מבנה הגיליון</h2></div>
+  <p class="chapter-intro">גיליון אחד לכל הזמנה: עמודות A–I קבועות בכל הזמנה, עמודה D (כמות) היא היחידה שמשתנה.</p>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">עמודות A–I ונוסחאותיהן</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>עמודה</th><th>תוכן</th></tr>
+        <tr><td class="mono">A</td><td>סעיף</td></tr>
+        <tr><td class="mono">B</td><td>תאור — <b>מדויק ומילה במילה מהמחירון, בלי קיצור ובלי תוספת</b></td></tr>
+        <tr><td class="mono">C</td><td>יח'</td></tr>
+        <tr><td class="mono">D</td><td>כמות — הדבר היחיד שמשתנה בין הזמנות</td></tr>
+        <tr><td class="mono">E</td><td>מחיר</td></tr>
+        <tr><td class="mono">F</td><td><span class="inline-code">=IF(E="","",E*0.15)</span> הנחת קבלן 15%</td></tr>
+        <tr><td class="mono">G</td><td><span class="inline-code">=IF(E="","",E*0.05)</span> תוספת דירה מאוכלסת 5%</td></tr>
+        <tr><td class="mono">H</td><td><span class="inline-code">=IF(E="","",E*1.05*0.85)</span> סה"כ מחיר יחידה</td></tr>
+        <tr><td class="mono">I</td><td><span class="inline-code">=IF(D="","",H*D)</span> סה"כ אחרי הנחה</td></tr>
+      </table>
+      <div class="callout"><b>כלל ברזל</b>אסור לקצר תיאור סעיף. 43 סעיפים קוצרו בטעות פעם אחת ותוקנו; זה קרה <b>שוב</b> אחרי איפוס טכני ששחזר גיבוי ישן. יש לשמור עותק של קובץ המקור עם התיאורים המלאים, לא רק את הקוד.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">בלוק קלט גולמי — עמודות K/L</span></summary>
+    <div class="body">
+      <p>K1 = כותרת, K2/L2 = "שדה"/"ערך". כל אחד מ-36+ השדות הקנוניים מקבל שורה — <b>גם אם לא הופיע בקובץ המקורי</b> (מקבל 0), כדי שהמבנה יהיה זהה בכל הזמנה. נוסחאות עמודה D מפנות לתאי L אלה כדי שכל כמות תהיה שקופה ומתועדת.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">בלוק סיכום פרקים בתחתית</span></summary>
+    <div class="body">
+      <p>שורה לכל פרק עם <span class="inline-code">=SUMIF(A:A,"XX.*",I:I)</span>, ואז שלוש שורות: <b>סה"כ עלות</b> = <span class="inline-code">SUM(טווח שורות הפרקים)</span>, <b>מע"מ 18%</b>, <b>סה"כ עלות כולל מע"מ</b>.</p>
+      <div class="callout"><b>מלכודת ידועה</b>כל קידומת פרק (01./05./09./11./12./15./22./30./60./85.) <b>חייבת</b> להופיע ברשימת הפרקים. קוד עם קידומת חסרה נעלם בשקט מכל סיכום — זה קרה בפועל וגרם לאובדן ₪12,037.94 מחשבון אמיתי. ראו פרק 14 (בדיקות איכות).</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">הסתרת שורות אפס (לא מחיקה)</span></summary>
+    <div class="body">
+      <ul>
+        <li>שורת פריט עם כמות 0 — מוסתרת (<span class="inline-code">row_dimensions.hidden</span>), <b>חוץ מ-12.99.0001 ו-12.99.0002</b> שתמיד מוצגות.</li>
+        <li>שורת כותרת פרק/תת-פרק — מוסתרת רק אם <b>כל</b> הילדים שלה הם 0.</li>
+        <li>שורת סיכום פרק בבלוק התחתון עם סכום 0 — גם מוסתרת.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head"><span class="num">03</span><h2>פירוט כמויות</h2></div>
+  <p class="chapter-intro">שכפול תא-תא של גיליון תבנית מקורי (13 קטגוריות מדידה), עם החלפת הפניית הגיליון בלבד. מטרתו: הסבר קריא לאדם, מודפס בנפרד ל-PDF (portrait, לא landscape).</p>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">מקור התבנית ואופן השכפול</span></summary>
+    <div class="body">
+      <p>נשכפל מגיליון "גיליון2" של קובץ המקור, כולל עיצוב/מיזוגים/רוחב עמודות. הפניות XLOOKUP בקובץ המקור מוחלפות ב-<span class="inline-code">INDEX/MATCH</span> (LibreOffice לא תומך אמין ב-XLOOKUP).</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">כלל הזהב: פירוט תמיד תואם לכתב הכמויות</span></summary>
+    <div class="body">
+      <p>"פירוט כמויות" <b>לעולם לא מחשב ערך עצמאי</b> שסותר את מה שרשום בפועל בכתב הכמויות. לדוגמה: קטגוריית "ידיות סיבוביות" שאבה בעבר ערך מחושב עצמאי — תוקן כך שהיא שואבת ישירות (INDEX/MATCH) מהכמות שרשומה בפועל בסעיפי 12.99.0001/12.99.0002 בכתב הכמויות.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">הערות טקסט חד-פעמיות</span></summary>
+    <div class="body">
+      <p>כשיש הערה ספציפית להזמנה (למשל "2 שעות נוספות של פועל גבס לסגירת חור..." או "הזמנה זו: 3 הנפות על אף שמדובר בקומת קרקע") — היא מתווספת <b>כטקסט בתא ההערה הקיים</b> באותה שורת קטגוריה, לא כשינוי בקוד.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head"><span class="num">04</span><h2>מוסכמות שמות קבצים</h2></div>
+  <details class="rule" open>
+    <summary><span class="arrow">›</span><span class="headline">שלוש מוסכמות שמות</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סוג קובץ</th><th>תבנית שם</th></tr>
+        <tr><td>הזמנה בודדת (כתב כמויות + פירוט)</td><td class="mono">חשבון &lt;מספר הזמנה&gt; - &lt;שם משפחה&gt;.xlsx</td></tr>
+        <tr><td>פירוט כמויות ל-PDF</td><td class="mono">פירוט כמויות &lt;מספר הזמנה&gt; - &lt;שם משפחה&gt;.pdf</td></tr>
+        <tr><td>חשבון מאוחד</td><td class="mono">חשבון &lt;מספר חשבון&gt;.xlsx / "...- סופי"</td></tr>
+        <tr><td>גיבוי JSON</td><td class="mono">חשבון_&lt;מספר חשבון&gt;_נתונים.json</td></tr>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head"><span class="num">05</span><h2>צבירה — חשבון מרובה הזמנות</h2></div>
+  <p class="chapter-intro">חשבון = job שמצטבר לאורך שיחה, נשמר כ-JSON אחרי כל הזמנה, ונבנה לקובץ מלא רק כשמבקשים.</p>
+
+  <details class="rule" open>
+    <summary><span class="arrow">›</span><span class="headline">מבנה ה-JSON</span></summary>
+    <div class="body">
+      <p><span class="inline-code">{"orders": [{"name","number","raw","overrides","locked","locked_file","extra_rows"}], "meta": {...}, "pending_notes": [...]}</span></p>
+      <p>הוספת הזמנה עם מספר שכבר קיים <b>מחליפה</b> את הישנה (לא כפילות).</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">תהליך העבודה</span></summary>
+    <div class="body">
+      <ol>
+        <li>קוראים את ריכוז הכמויות (וגם "פירוט אלמנטים"!).</li>
+        <li>בונים קובץ בודד להזמנה, מציגים <b>טקסט סיכום פרקים</b> מיידית בצ'אט לאימות.</li>
+        <li>שומרים ל-JSON, מוסרים קובץ גיבוי.</li>
+        <li>חוזר עד ש"תפיק את החשבון" — או אז נבנה קובץ מלא: ריכוז + גיליון לכל הזמנה, <b>בלי</b> גיליונות פירוט כמויות.</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">שאילתא — לא נכנס לחשבון</span></summary>
+    <div class="body">
+      <p>"שאילתא" / "רק תגיד לי" / "אל תצרף לחשבון" — מחשבים ומציגים, <b>לא</b> שומרים ל-JOB.</p>
+      <div class="callout ok"><b>עודכן</b>מכאן ואילך, כל שאילתא מקבלת <b>גם</b> קובץ אקסל מלא (כתב כמויות + פירוט כמויות) בנוסף למספר — לא רק בבקשה מפורשת.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">הערות פתוחות (pending_notes)</span></summary>
+    <div class="body">
+      <p>כשחסר מידע להשלמת סעיף ("צריך להוסיף X אבל אין לי פרטים עדיין") — נשמר ב-JSON, ומוצג לפני הפקת חשבון סופי.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head"><span class="num">06</span><h2>גיליון ריכוז</h2></div>
+  <p class="chapter-intro">בקובץ מאוחד: זוג עמודות (כמות + סה"כ לדירה) לכל הזמנה, ואז 2 עמודות סיכום כולל.</p>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">מבנה עמודות</span></summary>
+    <div class="body">
+      <p>A–G: מטא-דאטה משותפת (סעיף/תאור/יח'/מחיר/הנחות/סה"כ מחיר יחידה). לכל הזמנה: <b>כמות</b> (<span class="inline-code">='&lt;sheet&gt;'!D&lt;row&gt;</span>) ואז <b>סה"כ לדירה</b> (<span class="inline-code">=כמות*G</span>). בסוף: <b>סה"כ כמות חשבון</b> ו<b>סה"כ סכום חשבון</b>.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">בלוק סיכום פרקים לכל הזמנה בנפרד</span></summary>
+    <div class="body">
+      <p>מתחת לעמודות של <b>כל הזמנה</b> (לא רק הסיכום הכולל) — סטאק סיכום פרקים מלא (01…85, סה"כ עלות, מע"מ, סה"כ כולל מע"מ), כדי שאפשר לקרוא את פילוח הפרקים של הזמנה בודדת ישירות מהריכוז.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="arrow">›</span><span class="headline">וידוא עקביות — חובה בכל חשבון</span></summary>
+    <div class="body">
+      <p>סה"כ הריכוז חייב לשווה בדיוק לסכום כל גיליונות ההזמנה הבודדים, עד האגורה. פירוט מלא של 4 הבדיקות בפרק 14.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head"><span class="num">07</span><h2>מנוע הכללים — לפי פרק</h2></div>
+  <p class="chapter-intro">לכל סעיף: מקור הכמות (שדה גולמי ישיר, נוסחה מסעיפים אחרים, או קבוע). הרשימה המלאה כאן.</p>
+
+  <h3 class="subhead">09 — עבודות טיח</h3>
+  <details class="rule">
+    <summary><span class="code mono">09.011.9030</span><span class="headline">תיקוני טיח פנים</span></summary>
+    <div class="body"><p>כמות = שדה גולמי <span class="inline-code">היקף כולל</span>.</p></div>
+  </details>
+
+  <h3 class="subhead">11 — עבודות צביעה</h3>
+  <details class="rule">
+    <summary><span class="code mono">11.011.9660</span><span class="headline">חידוש צבע פנים לחדר</span></summary>
+    <div class="body"><p>כמות = שדה גולמי <span class="inline-code">מס' חדרים</span>.</p></div>
+  </details>
+  <details class="rule">
+    <summary><span class="code mono">11.011.2000</span><span class="headline">תוספת גוון מעבר לבסיס P <span class="tag warn">override בלבד</span></span></summary>
+    <div class="body">
+      <p>ברירת מחדל 0 בכל הזמנה. מופעל רק כשההזמנה מוגדרת עם גוון מיוחד/חריג (לא P הרגיל).</p>
+      <p>כמות = "סה"כ אחרי הנחה" של סעיף 11.011.9660 <b>בנטרול ההנחה</b>: <span class="inline-code">=I13/0.85/1.05</span>.</p>
+      <div class="callout"><b>שים לב לכיוון</b>מסומן = "יש להזמנה גוון מיוחד, יש להוסיף תוספת" — לא "משתמשים ב-P הרגיל".</div>
+    </div>
+  </details>
+
+  <h3 class="subhead">12 — עבודות אלומיניום (החלק המורכב ביותר)</h3>
+
+  <details class="rule">
+    <summary><span class="headline">חלון הזזה 2 מסלולים — משפחת 12.011</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סעיף</th><th>זיגוג</th><th>טווח שטח</th></tr>
+        <tr><td class="mono">12.011.0210</td><td>5+6+6 (קליל 7000)</td><td>1.0–2.0</td></tr>
+        <tr><td class="mono">12.011.0260</td><td>5+6+6 (קליל 9000)</td><td>0.6–1.0</td></tr>
+        <tr><td class="mono">12.011.0265</td><td>5+6+6 (קליל 9000)</td><td>1.0–2.0</td></tr>
+        <tr><td class="mono">12.011.0270</td><td>6+10+8</td><td>2.0–3.0</td></tr>
+        <tr><td class="mono">12.011.0285</td><td>6+10+8</td><td>4.5–6.0</td></tr>
+      </table>
+      <p>שיוך: לפי <b>שטח יחידה</b> של כל אלמנט בגיליון "פירוט אלמנטים" (מספר מסלולים=2), מסוכם לפי סעיף. אין "חור" — 2.0–3.0 תמיד 0270, מעל 3.0 תמיד 0285 (אין סעיף 5+6+6 בטווח 2–3, המוצר עצמו לא קיים בגודל הזה).</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">חלון הזזה 3 מסלולים — משפחת 12.012</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סעיף</th><th>זיגוג</th><th>טווח שטח</th></tr>
+        <tr><td class="mono">12.012.0100</td><td>5+6+6</td><td>1.0–2.0</td></tr>
+        <tr><td class="mono">12.012.0110</td><td>5+6+6</td><td>2.0–3.0</td></tr>
+        <tr><td class="mono">12.012.0120</td><td>6+10+8</td><td>3.0–5.0</td></tr>
+        <tr><td class="mono">12.012.0130</td><td>6+10+8</td><td>5.0–7.0</td></tr>
+      </table>
+      <p>אותו עיקרון כמו 12.011, למספר מסלולים=3.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.011.1001</span><span class="headline">תוספת 15% לחלק "הקבוע" (הזזה+קבוע בלבד)</span></summary>
+    <div class="body">
+      <p><b>רק</b> ל"הזזה+קבוע" (לא ל"קיפ+קבוע"/"דרייקיפ+קבוע" — ראו סעיף נפרד למטה). כמות = סכום משוקלל: לכל אלמנט הזזה+קבוע, שטח × מחיר-מלא (לפני הנחה) של הסעיף שאליו הוא שויך.</p>
+      <p>דוגמה: אם 4.15 מ"ר שויכו ל-12.011.0265 (₪2,120) ו-22.5 מ"ר ל-12.011.0270 (₪1,980) — הכמות היא <span class="inline-code">4.15*2120 + 22.5*1980</span>.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">דלת/ויטרינה 2 מסלולים — משפחת 12.051 <span class="tag ok">חדש</span></span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סעיף</th><th>זיגוג</th><th>טווח שטח</th></tr>
+        <tr><td class="mono">12.051.0460</td><td>8 מ"מ</td><td>4.0–6.0</td></tr>
+        <tr><td class="mono">12.051.0470</td><td>8 מ"מ</td><td>6.0–8.0</td></tr>
+      </table>
+      <p>שיוך לפי מספר מסלולים=2 בגיליון פירוט אלמנטים.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">דלת/ויטרינה 3 מסלולים — משפחת 12.052</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סעיף</th><th>זיגוג</th><th>טווח שטח</th></tr>
+        <tr><td class="mono">12.052.0020</td><td>6 מ"מ (קליל 7000)</td><td>6.0–8.0</td></tr>
+        <tr><td class="mono">12.052.0070</td><td>6 מ"מ (קליל 9000)</td><td>6.0–8.0</td></tr>
+        <tr><td class="mono">12.052.0080</td><td>8 מ"מ (קליל 9000)</td><td>8.0–10.0</td></tr>
+      </table>
+      <p>שיוך לפי מספר מסלולים=3. <span class="tag warn">שים לב</span> 12.052.0080 היא זכוכית <b>8 מ"מ</b>, לא 6 מ"מ — טעות ישנה שיוחסה כאן בטעות לדלי הקיזוז הלא נכון, תוקנה (ראו פרק 8).</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">קיפ / דרייקיפ — 12.014.0660</span></summary>
+    <div class="body">
+      <p><b>כרגע מבחינתנו קיפ או דרייקיפ תמיד 12.014.0660</b> (יש סעיף "קיפ" נפרד במחירון אבל הוא לא מופעל).</p>
+      <p><b>מינימום 0.6 מ"ר לכל יחידה בנפרד</b> — לא על השטח הכולל. אם יחידה בודדת קטנה מ-0.6, היא נספרת כ-0.6.</p>
+      <p>נוסחה: <span class="inline-code">SUM לכל יחידה של MAX(0.6, שטח_היחידה)</span>.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">קיפ+קבוע / דרייקיפ+קבוע — חובה לשאול <span class="tag warn">כלל קריטי</span></span></summary>
+    <div class="body">
+      <p>כשמזוהה אלמנט מסוג הזה, <b>אין לשייך אוטומטית</b>. חובה לשאול את המשתמש במפורש מה מידות חלק הקיפ בנפרד וחלק הקבוע בנפרד (בדרך כלל: אותו רוחב, גובה מתחלק לשני חלקים).</p>
+      <ul>
+        <li><b>חלק הקיפ/דרייקיפ</b> → 12.014.0660, לפי כלל המינימום 0.6/יחידה למעלה.</li>
+        <li><b>חלק הקבוע</b> → 12.016.0600 או 12.016.0610, נספר <b>ביחידות</b> (לא שטח!) לפי גודל היחידה. <b>אין</b> תוספת 15% (12.011.1001) לחלק הזה — הוא הוחלף במנגנון היחידות.</li>
+      </ul>
+      <div class="callout"><b>לתשומת לב:</b>"הזזה+קבוע" <b>שונה</b> — שם עדיין משתמשים בתוספת 15% הרגילה (12.011.1001), כי הנתונים כבר מגיעים כשטח יחיד אחד.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">חלון קבוע (עצמאי, לא כחלק מ"+קבוע") — 12.016.0600/0610</span></summary>
+    <div class="body"><p>נספר ביחידות לפי טווח גודל: 0.6–1.0 → 0600, 1.0–2.0 → 0610.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.061.9000</span><span class="headline">פירוק ויטרינה</span></summary>
+    <div class="body"><p>כמות = סכום כל 6 קודי דלת/ויטרינה: 12.052.0020+0070+0080+12.053.0200+0210+0450.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">תריסי גלילה — שלוש משפחות נפרדות לפי סוג ומיקום</span></summary>
+    <div class="body">
+      <h4>תריס רגיל (בלי חלוקה לחלון/ויטרינה)</h4>
+      <table>
+        <tr><th>סעיף</th><th>טווח</th><th>מחיר</th></tr>
+        <tr><td class="mono">12.065.1611</td><td>0.6–1.0</td><td>₪910</td></tr>
+        <tr><td class="mono">12.065.1613</td><td>1.0–3.0</td><td>₪717</td></tr>
+        <tr><td class="mono">12.065.1615</td><td>3.0–6.0 (וגם כל מה שמעל)</td><td>₪582</td></tr>
+      </table>
+      <h4>תריס אור — לחלונות (הזזה/הזזה+קבוע/קיפ/קיפ+קבוע)</h4>
+      <table>
+        <tr><th>סעיף</th><th>טווח</th><th>מחיר</th></tr>
+        <tr><td class="mono">12.065.1700</td><td>0.6–1.0</td><td>₪1,120</td></tr>
+        <tr><td class="mono">12.065.1710</td><td>1.0–3.0</td><td>₪800</td></tr>
+        <tr><td class="mono">12.065.1720</td><td>3.0–6.0</td><td>₪880</td></tr>
+        <tr><td class="mono">12.065.1730</td><td>6.0–8.5 (וגם כל מה שמעל)</td><td>₪840</td></tr>
+      </table>
+      <h4>תריס אור — לויטרינה/דלת ציר</h4>
+      <table>
+        <tr><th>סעיף</th><th>טווח</th><th>מחיר</th></tr>
+        <tr><td class="mono">12.065.1661</td><td>0.6–1.0</td><td>₪1,840</td></tr>
+        <tr><td class="mono">12.065.1671</td><td>1.0–3.0</td><td>₪1,730</td></tr>
+        <tr><td class="mono">12.065.1681</td><td>3.0–6.0 (וגם כל מה שמעל)</td><td>₪1,440</td></tr>
+      </table>
+      <div class="callout"><b>כלל מחיר קבוע</b>בכל המשפחות האלה יש שני מחירים ("עד X" / "מעל X" לפי כמות) — <b>תמיד לוקחים את "מעל"</b>, בלי תלות בכמות בפועל.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.065.2000–2050</span><span class="headline">מנוע חשמלי לתריס — 6 טווחי משקל</span></summary>
+    <div class="body"><p>כמות = שדות גולמיים ישירים: כמות מנוע עד 20 / 20–30 / 30–50 / 50–70 / 70–90 / 90–120+.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">פירוק תריסים — 12.065.9000/9020, עכשיו מותנה בקיום תריס <span class="tag ok">תוקן</span></span></summary>
+    <div class="body">
+      <p><span class="inline-code">12.065.9000</span> (עד 2 מ"ר, ביחידות) = שדה גולמי <span class="inline-code">מס' יחידות תריס לפירוק עד 2 מ"ר</span>.</p>
+      <p><span class="inline-code">12.065.9020</span> (מעל 2 מ"ר, במ"ר) = שדה גולמי <span class="inline-code">סה"כ שטח תריס לפירוק מעל 2 מ"ר</span>.</p>
+      <div class="callout ok"><b>כלל שנוסף:</b>שני הסעיפים האלה <b>חייבים להיות 0</b> אם אין בהזמנה שום שטח תריסים בפועל (רגיל/אור, חלונות/דלתות) — גם אם שדות רוחב ארגז התריס אינם ריקים. אי אפשר לפרק תריס שלא קיים.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.065.9100…0006</span><span class="headline">פירוק ארגז תריס — 8 טווחי רוחב, מותנה בקיום תריס</span></summary>
+    <div class="body">
+      <p>שדות גולמיים ישירים לפי רוחב (0-100 עד 401-450), אבל <b>עטופים בתנאי</b>: אם סכום כל שדות שטח התריסים (רגיל+אור, חלונות+דלתות) = 0 — כל 8 הסעיפים מתאפסים אוטומטית, ללא קשר לערך בשדה הרוחב עצמו.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.093.0022</span><span class="headline">תוספת 6% Fine Iron</span></summary>
+    <div class="body">
+      <p>כמות = <span class="inline-code">SUM("סה"כ אחרי הנחה" של רשימת סעיפים סגורה) / 0.85 / 1.05</span>.</p>
+      <p><b>לא כולל</b>: סעיפי פירוק, סעיפי זכוכית (12.068.xxx), וגם <b>לא</b> את סעיפי המנוע (12.065.2000–2050) — מנועים לא נצבעים. הכללת המנועים בטעות ניפחה הזמנה ב-₪460 בעבר.</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="code mono">12.99.0001 / 12.99.0002</span><span class="headline">ידיות סיבוביות — לפי כתובת בלבד</span></summary>
+    <div class="body">
+      <p>ברירת מחדל 0, <b>תמיד מוצג</b> בגיליון (גם ב-0). ראו פרק 12 לרשימת הכתובות המלאה.</p>
+      <p><span class="inline-code">12.99.0002</span> = מספר החלונות בהזמנה (מגיליון פירוט אלמנטים). <span class="inline-code">12.99.0001</span> = מספר הוויטרינות.</p>
+    </div>
+  </details>
+
+  <h3 class="subhead">15 — מיזוג אוויר</h3>
+  <details class="rule">
+    <summary><span class="headline">כל פרק 15 — תמיד 0</span></summary>
+    <div class="body"><p>15.041.1210, 15.041.4010 — לא בשימוש כרגע.</p></div>
+  </details>
+
+  <h3 class="subhead">22 — אלמנטים מתועשים</h3>
+  <details class="rule">
+    <summary><span class="headline">פרק חדש, נוסף אחרי שנעלם בשקט מסיכום <span class="tag warn">היסטוריית באג</span></span></summary>
+    <div class="body">
+      <p>סעיף 22.042.1800 נוסף להזמנה, אך פרק "22" לא היה קיים ברשימת הפרקים — הסעיף לא נכלל באף סיכום. ₪12,037.94 אבדו בשקט. תוקן: "22" נוסף לרשימת הפרקים בכל מקום.</p>
+    </div>
+  </details>
+
+  <h3 class="subhead">30 — וילונות</h3>
+  <details class="rule">
+    <summary><span class="code mono">30.050.9010</span><span class="headline">פירוק צלונים/וילונות</span></summary>
+    <div class="body"><p>כמות = סכום כל שטחי התריסים המותקנים (כל המשפחות, רגיל+אור).</p></div>
+  </details>
+
+  <h3 class="subhead">60 — שעות עבודה וציוד</h3>
+  <details class="rule">
+    <summary><span class="code mono">60.020.0090</span><span class="headline">חשמלאי מוסמך</span></summary>
+    <div class="body"><p>אוטומטי: 2 אם יש כל מנוע &gt;0 בהזמנה, אחרת 0.</p></div>
+  </details>
+  <details class="rule">
+    <summary><span class="code mono">60.010.0020</span><span class="headline">פועל בנין פשוט</span></summary>
+    <div class="body">
+      <p>ברירת מחדל: תמיד 3, קבוע.</p>
+      <div class="callout"><b>לא בהזמנות מיוחדות</b>ארגזי תריס בלבד / "השלמות" — יש לשאול ולעדכן ל-0 אם לא רלוונטי.</div>
+    </div>
+  </details>
+  <details class="rule">
+    <summary><span class="code mono">60.010.0010</span><span class="headline">פועל בנין מקצועי</span></summary>
+    <div class="body">
+      <p><span class="inline-code">(מנוע 90–120+ × 2) + (סכום 5 סוגי מנוע אחרים) + כמות טיפול בארגז</span>.</p>
+      <div class="callout"><b>טיפול בארגז לויטרינה = ×2</b>זה <b>לא כלל גלובלי</b> — override לפי הזמנה בלבד. שינוי גלובלי בטעות עדכן 6 הזמנות במקום אחת.</div>
+    </div>
+  </details>
+  <details class="rule">
+    <summary><span class="code mono">60.030.0605/0634/0644</span><span class="headline">מנוף לפי קומה</span></summary>
+    <div class="body">
+      <p><span class="inline-code">IF(הקומה מסומנת, IF(סכום 6 סוגי מנוע &gt;= 5, 2, 1), 0)</span>.</p>
+      <div class="callout ok"><b>תוקן</b>הסף הוא <b>&gt;=5</b> ("5 ומעלה"), לא &gt;5 ("יותר מ-5"). באג אמיתי שגילה שהזמנה עם בדיוק 5 מנועים קיבלה כמות שגויה.</div>
+    </div>
+  </details>
+  <details class="rule">
+    <summary><span class="code mono">60.020.0067 / 60.020.0105 / 60.010.0120</span><span class="headline">צוותי קריאה מיוחדת</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>סעיף</th><th>צוות</th><th>מחיר</th></tr>
+        <tr><td class="mono">60.020.0067</td><td>אלומיניום</td><td>₪3,400</td></tr>
+        <tr><td class="mono">60.020.0105</td><td>חשמלאים</td><td>₪3,500</td></tr>
+        <tr><td class="mono">60.010.0120</td><td>רצפים</td><td>₪3,650</td></tr>
+      </table>
+      <p>כולם ברירת מחדל 0, מופעלים רק כ-override מפורש להזמנה.</p>
+    </div>
+  </details>
+
+  <h3 class="subhead">85 — איטום ובידוד</h3>
+  <details class="rule">
+    <summary><span class="code mono">85.095.0950</span><span class="headline">טקסאונד</span></summary>
+    <div class="body"><p>כמות = שדה גולמי <span class="inline-code">סה"כ טקסאונד</span>.</p></div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter-head"><span class="num">08</span><h2>זיגוג — קיזוז והחלפה</h2></div>
+  <p class="chapter-intro">הלוגיקה הכי עדינה במערכת. כלל אחד כללי, המון קודים קטנים שמיישמים אותו.</p>
+
+  <details class="rule" open>
+    <summary><span class="headline">הכלל הכללי <span class="tag ok">מעודכן</span></span></summary>
+    <div class="body">
+      <p><b>כל סעיף שהתיאור שלו מזכיר מפרט זכוכית שאינו "זכוכית היעד" — מקבל קיזוז (מינוס השטח שלו), והסכום עובר בתוספת ליעד.</b></p>
+      <p>זכוכית היעד כברירת מחדל: <b>6+10+8 מ"מ</b> (סעיף 12.068.1216), אלא אם ההזמנה מגדירה יעד אחר במפורש (למשל 5+0.76+5 — ראו פרק 10).</p>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">מפת הדליים (מי מקזז את מי)</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>קוד</th><th>מפרט</th><th>מקזז (בברירת מחדל)</th></tr>
+        <tr><td class="mono">12.068.1172</td><td>5+6+6</td><td>12.012.0100 + 12.012.0110 + 12.011.0260 + 12.011.0265</td></tr>
+        <tr><td class="mono">12.068.1004</td><td>6 מ"מ שטוח</td><td>12.052.0020 + 12.052.0070 + 12.053.0200 + 0210 + 0450</td></tr>
+        <tr><td class="mono">12.068.1006</td><td>8 מ"מ שטוח</td><td>12.052.0080 <span class="tag ok">נוסף</span></td></tr>
+        <tr><td class="mono">12.068.0902</td><td>5 מ"מ שקוף</td><td>תמיד 0, לא בשימוש</td></tr>
+        <tr><td class="mono">12.068.1002</td><td>5 מ"מ מחוסם</td><td>תמיד 0, לא בשימוש</td></tr>
+        <tr><td class="mono">12.068.1320</td><td>5+0.76+5</td><td>ברירת מחדל 0; יעד בהזמנות חריגות</td></tr>
+        <tr><td class="mono">12.068.1216</td><td>6+10+8 (היעד הרגיל)</td><td><span class="inline-code">=-1172-1004-1006</span></td></tr>
+      </table>
+      <div class="callout warn"><b>באג ותיקון:</b>12.052.0080 הוא זיגוג <b>8 מ"מ</b>, לא 6 מ"מ — היה כלול בטעות בדלי 1004. תוקן והוצא, ונוסף לו דלי משלו (1006) אחרי שהתגלה שהוא היה חסר לגמרי מהתבנית.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">הזמנת זיגוג חריגה (יעד ≠ 6+10+8)</span></summary>
+    <div class="body">
+      <p>כשההזמנה כולה מוגדרת עם זיגוג יעד אחר (למשל 5+0.76+5):</p>
+      <ul>
+        <li>12.068.1216 הופך ל<b>קיזוז</b> (לא יעד!) — כולל את כל הסעיפים שברירת המחדל שלהם 6+10+8: 12.011.0270/0285, 12.012.0120/0130, 12.051.0460/0470, וגם קיפ/דרייקיפ אם רלוונטי.</li>
+        <li>1172 ו-1004/1006 ממשיכים לקזז את מה שהם תמיד קיזזו.</li>
+        <li>היעד החדש (למשל 1320) = <span class="inline-code">-(1216+1172+1004+1006)</span> — סכום <b>כל</b> מה שקוזז, לא רק חלק ממנו.</li>
+      </ul>
+      <div class="callout"><b>בדיקת איזון חובה:</b>הסכום שנוסף ליעד <b>חייב</b> להיות שווה בדיוק לסכום שקוזז מכל שאר הסעיפים. "לא יכול להיות שמוסיפים יותר זכוכית ממה שמקזזים" — אם יש פער, סימן שלא קיזזנו מספיק.</div>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter-head"><span class="num">09</span><h2>כלל "מעבר לטווח" (fallback)</h2></div>
+  <details class="rule" open>
+    <summary><span class="headline">כלל קבוע לכל משפחות טווחי הגודל</span></summary>
+    <div class="body">
+      <ul>
+        <li><b>קטן מהטווח הנמוך ביותר שיש</b> → משייכים לטווח הנמוך ביותר, עם <b>השטח האמיתי בפועל</b> (לא מעוגל כלפי מעלה, חוץ מקיפ/דרייקיפ שיש לו כלל מינימום 0.6 נפרד).</li>
+        <li><b>גדול מהטווח הגבוה ביותר שיש</b> → משייכים לטווח הגבוה ביותר, עם השטח האמיתי בפועל.</li>
+      </ul>
+      <p>חל על כל המשפחות: 12.011/12.012 (חלונות), 12.051/12.052 (דלתות/ויטרינה), משפחות התריס.</p>
+      <div class="callout warn"><b>תנאי:</b>הכלל עוזר רק אם הסעיף <b>קיים בפועל</b> במערכת (מחיר מאושר). אם המשפחה כולה עוד לא הוזנה (למשל חיכינו למחיר) — אין "הכי גבוה שיש", יש לחכות למחיר קודם.</div>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter-head"><span class="num">10</span><h2>הזמנות מיוחדות</h2></div>
+
+  <details class="rule">
+    <summary><span class="headline">ארגזי תריס בלבד</span></summary>
+    <div class="body"><p>רק 60.020.0067 (+ טקסאונד אם רלוונטי). לשאול ולאפס 60.010.0020.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">"השלמות" / ביטולי צוותים</span></summary>
+    <div class="body"><p>הזמנה נפרדת בשם "השלמות", מספר <span class="inline-code">0000</span>, בלי raw ובלי כתובת — override בלבד.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">זיגוג 5+0.76+5 (הזמנת ביטחון)</span></summary>
+    <div class="body"><p>ראו כלל מלא בפרק 8. הוחל לראשונה בהזמנה 1645, אומת שוב ובוצע תיקון איזון בהזמנה 1633.</p></div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter-head"><span class="num">11</span><h2>הזמנות נעולות ושורות ייחודיות</h2></div>
+
+  <details class="rule">
+    <summary><span class="headline">הזמנה נעולה (locked)</span></summary>
+    <div class="body">
+      <p>כשמשתמש עורך קובץ הזמנה ידנית ומחזיר אותו — הקובץ שלו הוא מקור האמת. מסומן <span class="inline-code">"locked": true, "locked_file": "..."</span>.</p>
+      <p>בבניית חשבון מאוחד: הגיליון מועתק <b>תא-תא</b> (ערכים/נוסחאות, עיצוב, מיזוגים, הסתרות) ולא נבנה מחדש. כל לולאת "עדכן את כל ההזמנות" <b>חייבת</b> לבדוק ולדלג על גיליונות נעולים.</p>
+      <div class="callout warn"><b>קרה בפועל:</b>לולאת עדכון מחיר גלובלית דרסה קובץ נעול כי שכחתי את הבדיקה. גם כשמחזירים קובץ ערוך ידנית — יש להריץ עליו בדיקה 1 (פרק 14) ולדווח על פער, לא "לתקן" בשקט.</div>
+    </div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">שורות ייחודיות להזמנה אחת (extra_rows)</span></summary>
+    <div class="body">
+      <p>סעיף שקיים רק בהזמנה אחת. בריכוז המאוחד מקבל שורה משלו: בעמודות ההזמנה שלו — הפניה לשורה שלו בגיליון שלו; בכל שאר ההזמנות — 0.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch12">
+  <div class="chapter-head"><span class="num">12</span><h2>כללי כתובת</h2></div>
+
+  <details class="rule" open>
+    <summary><span class="headline">תריס אור מול תריס רגיל — נקבע לפי כתובת</span></summary>
+    <div class="body">
+      <table>
+        <tr><th>תריס אור</th><th>תריס רגיל + ידיות סיבוביות</th></tr>
+        <tr><td>שולמית אלוני 15<br>משה רינת 4<br>משה רינת 10<br>מנחם בגין 40<br>מנחם בגין 50<br>מנחם בגין 52</td><td>משה רינת 2<br>מנחם בגין 48</td></tr>
+      </table>
+      <p>כשכתובת ההזמנה היא מ"תריס רגיל" — יש להשתמש בסעיפי התריס הרגילים (12.065.1613/1615 וכו') <b>וגם</b> להוסיף אוטומטית 12.99.0001/0002 (ידיות סיבוביות) לפי ספירת ויטרינות/חלונות מגיליון פירוט אלמנטים.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch13">
+  <div class="chapter-head"><span class="num">13</span><h2>מדיניות שאילתות</h2></div>
+  <details class="rule">
+    <summary><span class="headline">כללי שאילתא</span></summary>
+    <div class="body">
+      <ul>
+        <li>לא נכנס ל-JOB / חשבון.</li>
+        <li>נבדק מול "פירוט אלמנטים" בדיוק כמו הזמנה רגילה.</li>
+        <li>מזוהה תמיד לפי מספר הזמנה + שם משפחה מתוך הקובץ עצמו — לא לפי הקשר/זיכרון.</li>
+        <li>מקבל גם מספר וגם קובץ אקסל מלא, כברירת מחדל.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch14">
+  <div class="chapter-head"><span class="num">14</span><h2>בדיקות איכות (audit)</h2></div>
+  <p class="chapter-intro">חובה להריץ לפני מסירת כל חשבון סופי.</p>
+
+  <details class="rule" open>
+    <summary><span class="headline">4 הבדיקות</span></summary>
+    <div class="body">
+      <ol>
+        <li><b>לכל גיליון הזמנה:</b> סכום ישיר של עמודת I (שורות פריט בעלות מחיר בלבד — לא שורות כותרת!) = הערך המוצג ב"סה"כ עלות".</li>
+        <li><b>בריכוז, לכל הזמנה בנפרד:</b> סכום עמודת "סה"כ לדירה" שלה = "סה"כ עלות" בבלוק הסיכום הפרטי שלה.</li>
+        <li><b>בריכוז, לרוחב:</b> "סה"כ עלות" הכללי = סכום כל ה"סה"כ עלות" הפרטיים. שתי דרכי החישוב (SUMIF על העמודה הכללית, מול סכימת כל הזמנה) חייבות להסכים.</li>
+        <li><b>כיסוי פרקים (בדיקת שורש):</b> כל קידומת קוד סעיף קיימת ברשימת הפרקים. זו הבדיקה שהייתה תופסת את באג פרק 22 מראש.</li>
+      </ol>
+      <div class="callout warn"><b>מלכודת בבנייה:</b>בדיקה 1 חייבת לסכם רק שורות עם מחיר. סכימה נאיבית של כל עמודה I סופרת גם את שורות סיכום הפרקים ומכפילה את התוצאה פי 2.</div>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ -->
+<section class="chapter" id="ch15">
+  <div class="chapter-head"><span class="num">15</span><h2>לקחים ותיקוני יסוד</h2></div>
+  <p class="chapter-intro">רשימת הבאגים המרכזיים שכבר תפסנו, כדי שלא יחזרו.</p>
+
+  <details class="rule">
+    <summary><span class="headline">פרק 22 חסר מרשימת הפרקים → ₪12,037.94 נעלמו בשקט</span></summary>
+    <div class="body"><p>כל סכום הוא SUMIF לפי קידומת. קידומת שלא ברשימה = הסעיף קיים בגיליון אך לא נספר באף מקום. אין הודעת שגיאה.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">סף מנוף שגוי (&gt;5 במקום &gt;=5)</span></summary>
+    <div class="body"><p>הזמנה עם בדיוק 5 מנועים קיבלה כמות מנוף שגויה. תוקן לכלל גלובלי.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">override מקומי הוחל בטעות כשינוי גלובלי</span></summary>
+    <div class="body"><p>"טיפול בארגז לויטרינה = ×2" עודכן בטעות ב-rules.py במקום כ-override להזמנה בודדת. עדכן 6 הזמנות בטעות; תוקן וחזר ל-override.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">תיאורי סעיפים קוצרו — פעמיים</span></summary>
+    <div class="body"><p>קוצרו בטעות, תוקנו, וקוצרו <b>שוב</b> אחרי איפוס טכני ששחזר גיבוי ישן. הפתרון: לשמור גם את קובץ המקור המלא, לא רק את הקוד המבוסס עליו.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">לולאת עדכון גלובלית דרסה קובץ נעול</span></summary>
+    <div class="body"><p>עדכון מחיר כללי הופעל על כל ההזמנות כולל הזמנה נעולה, ומחק את התוכן הידני שלה. תוקן: כל לולאה כזו בודקת <span class="inline-code">locked</span> ומדלגת.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">שורת SUM לא כללה שורה שנוספה ידנית</span></summary>
+    <div class="body"><p>בקובץ שנערך ידנית על ידי המשתמש, סעיף חדש נוסף בשורה 96 אך נוסחת "סה"כ עלות" סיכמה רק עד שורה 105 והחסירה אותו — ₪14,204.77 חסרים כולל מע"מ. ריכוז שנבנה מחדש עם SUMIF-לפי-קידומת לא סבל מהבעיה, אבל הקובץ הבודד כן. לקח: לדווח על פער כזה, לא "לתקן" קובץ של המשתמש בלי לשאול.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">סעיפים חדשים מהמפקח בלי נוסחת סיכום כללי</span></summary>
+    <div class="body"><p>11 סעיפים חדשים (שהמפקח הוסיף במו"מ) נכנסו נכון לכל הזמנה בנפרד, אך עמודת "סה"כ סכום חשבון" הכללית לא כללה אותם — פער של ₪247,984.93 בחשבון שלם. תוקן ידנית, ונלמד ככלל: כל סעיף חדש חייב נוסחת אגרגציה בשתי העמודות (כמות + סכום), לא רק בעמודות ההזמנה הבודדת.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">הפניות שורה קשיחות (hard-coded) נשברות כשהתבנית גדלה</span></summary>
+    <div class="body"><p>override שהשתמש בהפניה כמו <span class="inline-code">=-D69-D70</span> נשבר כשנוספו סעיפים חדשים לתבנית ומספרי השורות זזו. יש לשלוף מספרי שורה עדכניים מהקובץ בפועל בכל פעם, לא לשנן אותם משיחה קודמת.</p></div>
+  </details>
+
+  <details class="rule">
+    <summary><span class="headline">בלבול בין משפחת חלונות למשפחת דלתות/ויטרינה</span></summary>
+    <div class="body"><p>ויטרינה עם 3 מסלולים שויכה בטעות למשפחת 12.012 (חלונות) במקום 12.052 (דלתות/ויטרינה). מספר המסלולים קובע רק את התת-משפחה בתוך סוג האלמנט הנכון — סוג האלמנט עצמו (מ"פירוט אלמנטים") קובע איזו משפחה ראשית.</p></div>
+  </details>
+</section>
+
+</main>
+</div>
+
+<footer>ספר החוקים · נבנה מתוך rules.py, order_template.py, ותיעוד השיחות המלאות</footer>
+
+<script>
+(function(){
+  // build TOC from chapters
+  const chapters = Array.from(document.querySelectorAll('section.chapter'));
+  const tocList = document.getElementById('toc-list');
+  chapters.forEach(ch=>{
+    const num = ch.querySelector('.num').textContent;
+    const title = ch.querySelector('h2').textContent;
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.innerHTML = '<span class="chnum">'+num+'</span>' + title;
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  // scrollspy
+  const links = Array.from(tocList.querySelectorAll('a'));
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const id = entry.target.id;
+      const link = links.find(l=>l.getAttribute('href') === '#'+id);
+      if(!link) return;
+      if(entry.isIntersecting){
+        links.forEach(l=>l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-10% 0px -70% 0px'});
+  chapters.forEach(ch=>observer.observe(ch));
+
+  // search filter across rule blocks
+  const search = document.getElementById('search');
+  const allRules = Array.from(document.querySelectorAll('details.rule'));
+  const allSubheads = Array.from(document.querySelectorAll('h3.subhead'));
+
+  function clearMarks(root){
+    root.querySelectorAll('mark').forEach(m=>{
+      const parent = m.parentNode;
+      parent.replaceChild(document.createTextNode(m.textContent), m);
+      parent.normalize();
+    });
+  }
+
+  function markText(node, term){
+    if(node.nodeType === 3){
+      const idx = node.textContent.toLowerCase().indexOf(term);
+      if(idx >= 0){
+        const before = node.textContent.slice(0, idx);
+        const match = node.textContent.slice(idx, idx+term.length);
+        const after = node.textContent.slice(idx+term.length);
+        const frag = document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(before));
+        const markEl = document.createElement('mark');
+        markEl.textContent = match;
+        frag.appendChild(markEl);
+        frag.appendChild(document.createTextNode(after));
+        node.parentNode.replaceChild(frag, node);
+        return true;
+      }
+      return false;
+    } else if(node.nodeType === 1 && node.tagName !== 'SCRIPT'){
+      let found = false;
+      Array.from(node.childNodes).forEach(child=>{
+        if(markText(child, term)) found = true;
+      });
+      return found;
+    }
+    return false;
+  }
+
+  search.addEventListener('input', ()=>{
+    const term = search.value.trim().toLowerCase();
+    allRules.forEach(r=>{
+      clearMarks(r);
+      if(!term){
+        r.classList.remove('hidden-by-search');
+        return;
+      }
+      const text = r.textContent.toLowerCase();
+      if(text.includes(term)){
+        r.classList.remove('hidden-by-search');
+        r.open = true;
+        markText(r, term);
+      } else {
+        r.classList.add('hidden-by-search');
+      }
+    });
+    allSubheads.forEach(s=> s.classList.remove('hidden-by-search'));
+  });
+})();
+</script>
+
+</body>
+</html>
