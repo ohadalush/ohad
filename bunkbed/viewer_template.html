@@ -126,24 +126,54 @@ const M = (x,y,z) => new THREE.Vector3(x,z,-y);
 const BASIS = {XZ:[[1,0,0],[0,0,1],[0,1,0]], YZ:[[0,1,0],[0,0,1],[1,0,0]], XY:[[1,0,0],[0,1,0],[0,0,1]]};
 const meshes = [];
 const edgeMat = new THREE.LineBasicMaterial({color:0x2a2a2a, transparent:true, opacity:.35});
+const ledMat = new THREE.MeshStandardMaterial({color:0xffd21f, emissive:0xffb800, emissiveIntensity:.9, roughness:.4});
+const ledMeshes = [];
+const shapeOf = (pts, holes=[]) => {
+  const s = new THREE.Shape(pts.map(([u,v])=>new THREE.Vector2(u,v)));
+  for (const h of holes) s.holes.push(new THREE.Path(h.map(([u,v])=>new THREE.Vector2(u,v))));
+  return s;
+};
+const extrude = (shape, depth, w0, m4) => {
+  const g = new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,curveSegments:4});
+  g.translate(0,0,w0); g.applyMatrix4(m4); return g;
+};
+function plateText(str){
+  const c = document.createElement('canvas'); c.width = 480; c.height = 220;
+  const x = c.getContext('2d');
+  x.fillStyle = '#c3c8cd'; x.fillRect(0,0,480,220);
+  for (let i=0;i<220;i+=2){ x.fillStyle = `rgba(255,255,255,${0.05+0.08*Math.random()})`; x.fillRect(0,i,480,1); }
+  x.font = '700 104px "IBM Plex Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(str,242,114);
+  x.fillStyle = '#2b2f33'; x.fillText(str,240,112);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+}
 for (const p of DATA.panels){
-  const shape = new THREE.Shape(p.pts.map(([u,v])=>new THREE.Vector2(u,v)));
-  const geo = new THREE.ExtrudeGeometry(shape,{depth:p.t,bevelEnabled:false,curveSegments:4});
   const [eu,ev,ew] = BASIS[p.plane].map(b=>M(...b));
   const m4 = new THREE.Matrix4().makeBasis(eu,ev,ew).setPosition(M(...p.origin));
-  geo.applyMatrix4(m4);
-  const mat = new THREE.MeshStandardMaterial({color:DATA.materials[p.mat].color, roughness:.72, side:THREE.DoubleSide});
+  const metal = p.mat === 'steel' || p.mat === 'knob';
+  const mat = new THREE.MeshStandardMaterial({color:DATA.materials[p.mat].color, roughness:metal?.35:.72,
+    metalness:metal?.6:0, side:THREE.DoubleSide});
+  let geo, extra = [];
+  if (p.grooves.length){
+    // back layer full, front layer with the LED grooves cut out, LED strip inside each groove
+    geo = extrude(shapeOf(p.pts), p.t - p.gd, p.gd, m4);
+    extra.push(new THREE.Mesh(extrude(shapeOf(p.pts, p.grooves), p.gd, 0, m4), mat));
+    for (const g of p.grooves){ const l = new THREE.Mesh(extrude(shapeOf(g), p.gd - 1, 1, m4), ledMat); ledMeshes.push(l); extra.push(l); }
+  } else geo = extrude(shapeOf(p.pts), p.t, 0, m4);
   const mesh = new THREE.Mesh(geo,mat);
   mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,30), edgeMat));
-  mesh.userData = {p, ex:M(...p.explode).add(new THREE.Vector3(0,0,0)), base:mat.color.clone()};
+  for (const e of extra) mesh.add(e);
+  if (p.text){
+    const xs = p.pts.map(q=>q[0]), ys = p.pts.map(q=>q[1]);
+    const w = Math.max(...xs)-Math.min(...xs), h = Math.max(...ys)-Math.min(...ys);
+    const pg = new THREE.PlaneGeometry(w-14, h-14);
+    pg.translate((Math.max(...xs)+Math.min(...xs))/2, (Math.max(...ys)+Math.min(...ys))/2, -0.6);
+    pg.applyMatrix4(m4);
+    mesh.add(new THREE.Mesh(pg, new THREE.MeshStandardMaterial({map:plateText(p.text), metalness:.15, roughness:.45, side:THREE.DoubleSide})));
+  }
+  mesh.userData = {p, ex:M(...p.explode), base:mat.color.clone()};
   scene.add(mesh); meshes.push(mesh);
 }
-const ledGroup = new THREE.Group();
-const ledMat = new THREE.LineBasicMaterial({color:0xffa24a});
-for (const s of DATA.led){
-  ledGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(s.map(q=>M(...q))), ledMat));
-}
-scene.add(ledGroup);
 
 const box = new THREE.Box3(); meshes.forEach(m=>box.expandByObject(m));
 const center = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()).length();
@@ -171,8 +201,8 @@ const visible = Object.fromEntries(Object.keys(GROUPS).map(g=>[g,true]));
 function update(){
   const k = +exp.value;
   for (const m of meshes){ m.position.copy(m.userData.ex).multiplyScalar(k); m.visible = visible[m.userData.p.group]; }
-  ledGroup.visible = document.getElementById('led').checked && visible.fascia;
-  ledGroup.position.set(0,0,400*k);
+  const ledOn = document.getElementById('led').checked;
+  for (const l of ledMeshes) l.visible = ledOn;
   dimGroup.visible = document.getElementById('dimsOn').checked && k < 0.05;
   dimGroup.traverse(o => { if (o.isCSS2DObject) o.element.hidden = !dimGroup.visible; });
 }

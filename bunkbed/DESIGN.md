@@ -27,3 +27,8 @@
 `pip install ezdxf && python3 bunkbed/build.py` → `bunkbed/out/`:
 `cutlist.csv` (רשימת חיתוך), `hardware.csv` (פרזול), `dxf/<id>.dxf` (קובץ CNC לכל חלק), `all_panels.dxf`, `viewer.html` (תלת־ממד).
 משנים פרמטרים בראש `build.py` (מילון `P`) ומריצים שוב. הסקריפט בודק התנגשויות בין חלקים ומחזיר שגיאה אם יש כאלה.
+
+## SketchUp
+`out/bunkbed_sketchup.rb` builds two models in SketchUp: "מודל מורכב" (assembled) and "מודל מפורק" (exploded).
+Ruby Console: `load 'C:/path/bunkbed_sketchup.rb'`, then File > Save As `.skp`. Each part is a named group, grouped by category with tags.
+Front S: MDF 25 with a 12x10 LED groove (DXF layer `LED_GROOVE_12x10`, pocket on the front face).
